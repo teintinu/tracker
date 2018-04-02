@@ -1,7 +1,8 @@
 # tracker (from Meteor)
 
 [![Build Status](https://semaphoreci.com/api/v1/thr0w/tracker/branches/master/badge.svg)](https://semaphoreci.com/thr0w/tracker)
-[![Coverage Status](https://coveralls.io/repos/github/thr0w/tracker/badge.svg?branch=master)](https://coveralls.io/github/thr0w/tracker?branch=master)
+[![Coverage Status]
+[![codecov](https://codecov.io/gh/thr0w/tracker/branch/master/graph/badge.svg)](https://codecov.io/gh/thr0w/tracker)
 
 This package is an adaptation from 
 - http://docs.meteor.com/#tracker
