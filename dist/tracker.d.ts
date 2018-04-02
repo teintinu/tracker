@@ -1,20 +1,20 @@
-export declare type RunOptions = {
+export interface IRunOptions {
     finishSynchronously?: boolean;
-};
-export declare type ComputationOptions = {
+}
+export interface IComputationOptions {
     onError?: (error: Error) => void;
-};
+}
 export declare class Computation {
     stopped: boolean;
     invalidated: boolean;
     firstRun: boolean;
-    _id: number;
-    _onInvalidateCallbacks: Array<(comp: Computation) => void>;
-    _onStopCallbacks: Array<(comp: Computation) => void>;
-    _parent: Computation;
-    _func: (comp: Computation) => void;
-    _onError?: (error: Error) => void;
-    _recomputing: boolean;
+    id: number;
+    private onInvalidateCallbacks;
+    private onStopCallbacks;
+    private parent;
+    private func;
+    private onError?;
+    private recomputing;
     constructor(f: (comp: Computation) => void, parent: Computation, onError?: (error: Error) => void);
     onInvalidate(f: (comp: Computation) => void): void;
     onStop(f: (comp: Computation) => void): void;
@@ -27,7 +27,7 @@ export declare class Computation {
     run(): void;
 }
 export declare class Dependency {
-    _dependentsById: {
+    dependentsById: {
         [name: string]: Computation;
     };
     constructor();
@@ -53,5 +53,5 @@ export declare class Dependency {
  * thrown. Defaults to the error being logged to the console.
  * @returns {Tracker.Computation}
  */
-export declare function autorun(f: (comp: Computation) => void, options?: ComputationOptions): Computation;
+export declare function autorun(f: (comp: Computation) => void, options?: IComputationOptions): Computation;
 export declare function flush(): void;

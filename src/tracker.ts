@@ -2,10 +2,10 @@
 // adapted from http://docs.meteor.com/#tracker //
 /////////////////////////////////////////////////
 
-export type RunOptions = {
-    finishSynchronously?: boolean
+export interface IRunOptions {
+    finishSynchronously?: boolean;
 }
-export type ComputationOptions = {
+export interface IComputationOptions {
     onError?: (error: Error) => void;
 }
 
@@ -14,32 +14,34 @@ const Tracker = {
     currentComputation: null as any as Computation,
     flush() {
         Tracker._runFlush({
-            finishSynchronously: true
+            finishSynchronously: true,
         });
     },
     inFlush() {
         return inFlush;
     },
-    _runFlush(options: RunOptions) {
-        if (Tracker.inFlush())
+    _runFlush(options: IRunOptions) {
+        if (Tracker.inFlush()) {
             throw new Error("Can't call Tracker.flush while flushing");
+        }
 
-        if (inCompute)
+        if (inCompute) {
             throw new Error("Can't flush inside Tracker.autorun");
+        }
 
         options = options || {};
 
         inFlush = true;
         willFlush = true;
 
-        var recomputedCount = 0;
-        var finishedTry = false;
+        let recomputedCount = 0;
+        let finishedTry = false;
         try {
             while (pendingComputations.length ||
                 afterFlushCallbacks.length) {
 
                 while (pendingComputations.length) {
-                    var comp = pendingComputations.shift();
+                    const comp = pendingComputations.shift();
                     if (comp) {
                         comp._recompute();
                         if (comp._needsRecompute()) {
@@ -54,13 +56,14 @@ const Tracker = {
                 }
 
                 if (afterFlushCallbacks.length) {
-                    var func = afterFlushCallbacks.shift();
-                    if (func)
+                    const func = afterFlushCallbacks.shift();
+                    if (func) {
                         try {
                             func();
                         } catch (e) {
                             //
                         }
+                    }
                 }
             }
             finishedTry = true;
@@ -68,39 +71,40 @@ const Tracker = {
             if (!finishedTry) {
                 inFlush = false;
                 Tracker._runFlush({
-                    finishSynchronously: options.finishSynchronously
+                    finishSynchronously: options.finishSynchronously,
                 });
             }
             willFlush = false;
             inFlush = false;
             if (pendingComputations.length || afterFlushCallbacks.length) {
                 if (options.finishSynchronously) {
-                    //eslint-disable-next-line
+                    // tslint:disable-next-line
                     throw new Error("still have more to do?");  // shouldn't happen
                 }
-                //eslint-disable-next-line
                 setTimeout(requireFlush, 10);
             }
         }
     },
-    autorun(f: (comp: Computation) => void, options?: ComputationOptions) {
-        if (typeof f !== 'function')
-            throw new Error('Tracker.autorun requires a function argument');
+    autorun(f: (comp: Computation) => void, options?: IComputationOptions) {
+        if (typeof f !== "function") {
+            throw new Error("Tracker.autorun requires a function argument");
+        }
 
         options = options || {};
 
-        var c = new Computation(
+        const c = new Computation(
             f, Tracker.currentComputation, options.onError);
 
-        if (Tracker.active)
-            Tracker.onInvalidate(function () {
+        if (Tracker.active) {
+            Tracker.onInvalidate(() => {
                 c.stop();
             });
+        }
 
         return c;
     },
     nonreactive(f: () => void) {
-        var previous = Tracker.currentComputation;
+        const previous = Tracker.currentComputation;
         setCurrentComputation(null as any);
         try {
             return f();
@@ -109,8 +113,9 @@ const Tracker = {
         }
     },
     onInvalidate(f: () => void) {
-        if (!Tracker.active)
+        if (!Tracker.active) {
             throw new Error("Tracker.onInvalidate requires a currentComputation");
+        }
 
         Tracker.currentComputation.onInvalidate(f);
     },
@@ -120,13 +125,12 @@ const Tracker = {
     },
 };
 
-
 let nextId = 1;
-let pendingComputations: Computation[] = [];
+const pendingComputations: Computation[] = [];
 let willFlush = false;
 let inFlush = false;
 let inCompute = false;
-let afterFlushCallbacks: Array<() => void> = [];
+const afterFlushCallbacks: Array<() => void> = [];
 
 function setCurrentComputation(c: Computation) {
     Tracker.currentComputation = c;
@@ -142,195 +146,207 @@ function requireFlush() {
 }
 
 export class Computation {
-    stopped: boolean;
-    invalidated: boolean;
-    firstRun: boolean;
-    _id: number
-    _onInvalidateCallbacks: Array<(comp: Computation) => void>;
-    _onStopCallbacks: Array<(comp: Computation) => void>;
-    _parent: Computation;
-    _func: (comp: Computation) => void;
-    _onError?: (error: Error) => void;
-    _recomputing: boolean;
+    public stopped: boolean;
+    public invalidated: boolean;
+    public firstRun: boolean;
+    public id: number;
+    private onInvalidateCallbacks: Array<(comp: Computation) => void>;
+    private onStopCallbacks: Array<(comp: Computation) => void>;
+    private parent: Computation;
+    private func: (comp: Computation) => void;
+    private onError?: (error: Error) => void;
+    private recomputing: boolean;
 
     constructor(f: (comp: Computation) => void, parent: Computation, onError?: (error: Error) => void) {
         this.stopped = false;
         this.invalidated = false;
         this.firstRun = true;
 
-        this._id = nextId++;
-        this._onInvalidateCallbacks = [];
-        this._onStopCallbacks = [];
-        this._parent = parent;
-        this._func = f;
-        this._onError = onError;
-        this._recomputing = false;
+        this.id = nextId++;
+        this.onInvalidateCallbacks = [];
+        this.onStopCallbacks = [];
+        this.parent = parent;
+        this.func = f;
+        this.onError = onError;
+        this.recomputing = false;
 
-        var errored = true;
+        let errored = true;
         try {
             this._compute();
             errored = false;
         } finally {
             this.firstRun = false;
-            if (errored)
+            if (errored) {
                 this.stop();
+            }
         }
     }
 
-    onInvalidate(f: (comp: Computation) => void) {
-        if (typeof f !== 'function')
+    public onInvalidate(f: (comp: Computation) => void) {
+        if (typeof f !== "function") {
             throw new Error("onInvalidate requires a function");
+        }
 
         if (this.invalidated) {
             Tracker.nonreactive(() => f(this));
         } else {
-            this._onInvalidateCallbacks.push(f);
+            this.onInvalidateCallbacks.push(f);
         }
     }
 
-    onStop(f: (comp: Computation) => void) {
-        if (typeof f !== 'function')
+    public onStop(f: (comp: Computation) => void) {
+        if (typeof f !== "function") {
             throw new Error("onStop requires a function");
+        }
 
         if (this.stopped) {
             Tracker.nonreactive(() => f(this));
         } else {
-            this._onStopCallbacks.push(f);
+            this.onStopCallbacks.push(f);
         }
     }
 
-    invalidate() {
+    public invalidate() {
         if (!this.invalidated) {
-            if (!this._recomputing && !this.stopped) {
+            if (!this.recomputing && !this.stopped) {
                 requireFlush();
                 pendingComputations.push(this);
             }
 
             this.invalidated = true;
-            //eslint-disable-next-line
-            for (var i = 0, f: (comp: Computation) => void; f = this._onInvalidateCallbacks[i]; i++) {
+            // tslint:disable-next-line
+            for (let i = 0, f: (comp: Computation) => void; f = this.onInvalidateCallbacks[i]; i++) {
                 Tracker.nonreactive(() => f(this));
             }
-            this._onInvalidateCallbacks = [];
+            this.onInvalidateCallbacks = [];
         }
     }
 
-    stop() {
+    public stop() {
         if (!this.stopped) {
             this.stopped = true;
             this.invalidate();
-            //eslint-disable-next-line
-            for (var i = 0, f: (comp: Computation) => void; f = this._onStopCallbacks[i]; i++) {
+            // tslint:disable-next-line
+            for (let i = 0, f: (comp: Computation) => void; f = this.onStopCallbacks[i]; i++) {
                 Tracker.nonreactive(() => f(this));
             }
-            this._onStopCallbacks = [];
+            this.onStopCallbacks = [];
         }
     }
 
-    _compute() {
+    public _compute() {
         this.invalidated = false;
 
-        var previous = Tracker.currentComputation;
+        const previous = Tracker.currentComputation;
         setCurrentComputation(this);
-        var previousInCompute = inCompute;
+        const previousInCompute = inCompute;
         inCompute = true;
         try {
-            this._func(this);
+            this.func(this);
         } finally {
             setCurrentComputation(previous);
             inCompute = previousInCompute;
         }
     }
 
-    _needsRecompute() {
+    public _needsRecompute() {
         return this.invalidated && !this.stopped;
     }
 
-    _recompute() {
-        this._recomputing = true;
+    public _recompute() {
+        this.recomputing = true;
         try {
             if (this._needsRecompute()) {
                 try {
                     this._compute();
                 } catch (e) {
-                    if (this._onError) {
-                        this._onError(e);
+                    if (this.onError) {
+                        this.onError(e);
                     }
                 }
             }
         } finally {
-            this._recomputing = false;
+            this.recomputing = false;
         }
     }
 
-    flush() {
-        if (this._recomputing)
+    public flush() {
+        if (this.recomputing) {
             return;
+        }
 
         this._recompute();
     }
 
-    run() {
+    public run() {
         this.invalidate();
         this.flush();
     }
 }
 
+// tslint:disable-next-line
 export class Dependency {
-    _dependentsById: { [name: string]: Computation }
+    public dependentsById: {
+        [name: string]: Computation,
+    };
     constructor() {
-        this._dependentsById = Object.create(null);
+        this.dependentsById = Object.create(null);
     }
 
-    depend(computation?: Computation) {
+    public depend(computation?: Computation) {
         if (!computation) {
-            if (!Tracker.active)
+            if (!Tracker.active) {
                 return false;
+            }
 
             computation = Tracker.currentComputation;
         }
-        var id = computation._id;
-        if (!(id in this._dependentsById)) {
-            this._dependentsById[id] = computation;
+        const id = computation.id;
+        if (!(id in this.dependentsById)) {
+            this.dependentsById[id] = computation;
             computation.onInvalidate(() => {
-                delete this._dependentsById[id];
+                delete this.dependentsById[id];
             });
             return true;
         }
         return false;
     }
 
-    changed() {
-        for (var id in this._dependentsById)
-            this._dependentsById[id].invalidate();
+    public changed() {
+        // tslint:disable-next-line
+        for (const id in this.dependentsById) {
+            this.dependentsById[id].invalidate();
+        }
     }
 
-    hasDependents() {
-        for (var id in this._dependentsById)
+    public hasDependents() {
+        // tslint:disable-next-line
+        for (const id in this.dependentsById) {
             return true;
+        }
         return false;
     }
 
-    async waitForNextChange(timeout?: number) {
-        const err = new Error('timeout');
+    public async waitForNextChange(timeout?: number) {
+        const err = new Error("timeout");
         return new Promise((resolve, reject) => {
             const tm = timeout && setTimeout(() => {
                 reject(err);
                 comp.stop();
-            }, timeout)
-            const comp = autorun((comp) => {
+            }, timeout);
+            const comp = autorun((icomp) => {
                 this.depend();
-                if (!comp.firstRun) {
-                    if (tm)
+                if (!icomp.firstRun) {
+                    if (tm) {
                         clearTimeout(tm);
+                    }
                     resolve();
-                    comp.stop();
+                    icomp.stop();
                 }
-            })
-        })
+            });
+        });
     }
 }
-
 
 /**
  * @callback Tracker.ComputationFunction
@@ -350,7 +366,7 @@ export class Dependency {
  * @returns {Tracker.Computation}
  */
 
-export function autorun(f: (comp: Computation) => void, options?: ComputationOptions) {
+export function autorun(f: (comp: Computation) => void, options?: IComputationOptions) {
     return Tracker.autorun(f, options);
 }
 

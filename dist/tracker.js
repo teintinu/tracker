@@ -43,17 +43,19 @@ var Tracker = {
     currentComputation: null,
     flush: function () {
         Tracker._runFlush({
-            finishSynchronously: true
+            finishSynchronously: true,
         });
     },
     inFlush: function () {
         return inFlush;
     },
     _runFlush: function (options) {
-        if (Tracker.inFlush())
+        if (Tracker.inFlush()) {
             throw new Error("Can't call Tracker.flush while flushing");
-        if (inCompute)
+        }
+        if (inCompute) {
             throw new Error("Can't flush inside Tracker.autorun");
+        }
         options = options || {};
         inFlush = true;
         willFlush = true;
@@ -77,13 +79,14 @@ var Tracker = {
                 }
                 if (afterFlushCallbacks.length) {
                     var func = afterFlushCallbacks.shift();
-                    if (func)
+                    if (func) {
                         try {
                             func();
                         }
                         catch (e) {
                             //
                         }
+                    }
                 }
             }
             finishedTry = true;
@@ -92,30 +95,31 @@ var Tracker = {
             if (!finishedTry) {
                 inFlush = false;
                 Tracker._runFlush({
-                    finishSynchronously: options.finishSynchronously
+                    finishSynchronously: options.finishSynchronously,
                 });
             }
             willFlush = false;
             inFlush = false;
             if (pendingComputations.length || afterFlushCallbacks.length) {
                 if (options.finishSynchronously) {
-                    //eslint-disable-next-line
+                    // tslint:disable-next-line
                     throw new Error("still have more to do?"); // shouldn't happen
                 }
-                //eslint-disable-next-line
                 setTimeout(requireFlush, 10);
             }
         }
     },
     autorun: function (f, options) {
-        if (typeof f !== 'function')
-            throw new Error('Tracker.autorun requires a function argument');
+        if (typeof f !== "function") {
+            throw new Error("Tracker.autorun requires a function argument");
+        }
         options = options || {};
         var c = new Computation(f, Tracker.currentComputation, options.onError);
-        if (Tracker.active)
+        if (Tracker.active) {
             Tracker.onInvalidate(function () {
                 c.stop();
             });
+        }
         return c;
     },
     nonreactive: function (f) {
@@ -129,8 +133,9 @@ var Tracker = {
         }
     },
     onInvalidate: function (f) {
-        if (!Tracker.active)
+        if (!Tracker.active) {
             throw new Error("Tracker.onInvalidate requires a currentComputation");
+        }
         Tracker.currentComputation.onInvalidate(f);
     },
     afterFlush: function (f) {
@@ -160,13 +165,13 @@ var Computation = /** @class */ (function () {
         this.stopped = false;
         this.invalidated = false;
         this.firstRun = true;
-        this._id = nextId++;
-        this._onInvalidateCallbacks = [];
-        this._onStopCallbacks = [];
-        this._parent = parent;
-        this._func = f;
-        this._onError = onError;
-        this._recomputing = false;
+        this.id = nextId++;
+        this.onInvalidateCallbacks = [];
+        this.onStopCallbacks = [];
+        this.parent = parent;
+        this.func = f;
+        this.onError = onError;
+        this.recomputing = false;
         var errored = true;
         try {
             this._compute();
@@ -174,45 +179,51 @@ var Computation = /** @class */ (function () {
         }
         finally {
             this.firstRun = false;
-            if (errored)
+            if (errored) {
                 this.stop();
+            }
         }
     }
     Computation.prototype.onInvalidate = function (f) {
         var _this = this;
-        if (typeof f !== 'function')
+        if (typeof f !== "function") {
             throw new Error("onInvalidate requires a function");
+        }
         if (this.invalidated) {
             Tracker.nonreactive(function () { return f(_this); });
         }
         else {
-            this._onInvalidateCallbacks.push(f);
+            this.onInvalidateCallbacks.push(f);
         }
     };
     Computation.prototype.onStop = function (f) {
         var _this = this;
-        if (typeof f !== 'function')
+        if (typeof f !== "function") {
             throw new Error("onStop requires a function");
+        }
         if (this.stopped) {
             Tracker.nonreactive(function () { return f(_this); });
         }
         else {
-            this._onStopCallbacks.push(f);
+            this.onStopCallbacks.push(f);
         }
     };
     Computation.prototype.invalidate = function () {
         var _this = this;
         if (!this.invalidated) {
-            if (!this._recomputing && !this.stopped) {
+            if (!this.recomputing && !this.stopped) {
                 requireFlush();
                 pendingComputations.push(this);
             }
             this.invalidated = true;
-            //eslint-disable-next-line
-            for (var i = 0, f; f = this._onInvalidateCallbacks[i]; i++) {
+            var _loop_1 = function (i, f) {
                 Tracker.nonreactive(function () { return f(_this); });
+            };
+            // tslint:disable-next-line
+            for (var i = 0, f = void 0; f = this.onInvalidateCallbacks[i]; i++) {
+                _loop_1(i, f);
             }
-            this._onInvalidateCallbacks = [];
+            this.onInvalidateCallbacks = [];
         }
     };
     Computation.prototype.stop = function () {
@@ -220,11 +231,14 @@ var Computation = /** @class */ (function () {
         if (!this.stopped) {
             this.stopped = true;
             this.invalidate();
-            //eslint-disable-next-line
-            for (var i = 0, f; f = this._onStopCallbacks[i]; i++) {
+            var _loop_2 = function (i, f) {
                 Tracker.nonreactive(function () { return f(_this); });
+            };
+            // tslint:disable-next-line
+            for (var i = 0, f = void 0; f = this.onStopCallbacks[i]; i++) {
+                _loop_2(i, f);
             }
-            this._onStopCallbacks = [];
+            this.onStopCallbacks = [];
         }
     };
     Computation.prototype._compute = function () {
@@ -234,7 +248,7 @@ var Computation = /** @class */ (function () {
         var previousInCompute = inCompute;
         inCompute = true;
         try {
-            this._func(this);
+            this.func(this);
         }
         finally {
             setCurrentComputation(previous);
@@ -245,26 +259,27 @@ var Computation = /** @class */ (function () {
         return this.invalidated && !this.stopped;
     };
     Computation.prototype._recompute = function () {
-        this._recomputing = true;
+        this.recomputing = true;
         try {
             if (this._needsRecompute()) {
                 try {
                     this._compute();
                 }
                 catch (e) {
-                    if (this._onError) {
-                        this._onError(e);
+                    if (this.onError) {
+                        this.onError(e);
                     }
                 }
             }
         }
         finally {
-            this._recomputing = false;
+            this.recomputing = false;
         }
     };
     Computation.prototype.flush = function () {
-        if (this._recomputing)
+        if (this.recomputing) {
             return;
+        }
         this._recompute();
     };
     Computation.prototype.run = function () {
@@ -274,34 +289,40 @@ var Computation = /** @class */ (function () {
     return Computation;
 }());
 exports.Computation = Computation;
+// tslint:disable-next-line
 var Dependency = /** @class */ (function () {
     function Dependency() {
-        this._dependentsById = Object.create(null);
+        this.dependentsById = Object.create(null);
     }
     Dependency.prototype.depend = function (computation) {
         var _this = this;
         if (!computation) {
-            if (!Tracker.active)
+            if (!Tracker.active) {
                 return false;
+            }
             computation = Tracker.currentComputation;
         }
-        var id = computation._id;
-        if (!(id in this._dependentsById)) {
-            this._dependentsById[id] = computation;
+        var id = computation.id;
+        if (!(id in this.dependentsById)) {
+            this.dependentsById[id] = computation;
             computation.onInvalidate(function () {
-                delete _this._dependentsById[id];
+                delete _this.dependentsById[id];
             });
             return true;
         }
         return false;
     };
     Dependency.prototype.changed = function () {
-        for (var id in this._dependentsById)
-            this._dependentsById[id].invalidate();
+        // tslint:disable-next-line
+        for (var id in this.dependentsById) {
+            this.dependentsById[id].invalidate();
+        }
     };
     Dependency.prototype.hasDependents = function () {
-        for (var id in this._dependentsById)
+        // tslint:disable-next-line
+        for (var id in this.dependentsById) {
             return true;
+        }
         return false;
     };
     Dependency.prototype.waitForNextChange = function (timeout) {
@@ -309,19 +330,20 @@ var Dependency = /** @class */ (function () {
             var _this = this;
             var err;
             return __generator(this, function (_a) {
-                err = new Error('timeout');
+                err = new Error("timeout");
                 return [2 /*return*/, new Promise(function (resolve, reject) {
                         var tm = timeout && setTimeout(function () {
                             reject(err);
                             comp.stop();
                         }, timeout);
-                        var comp = autorun(function (comp) {
+                        var comp = autorun(function (icomp) {
                             _this.depend();
-                            if (!comp.firstRun) {
-                                if (tm)
+                            if (!icomp.firstRun) {
+                                if (tm) {
                                     clearTimeout(tm);
+                                }
                                 resolve();
-                                comp.stop();
+                                icomp.stop();
                             }
                         });
                     })];
