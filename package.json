@@ -1,5 +1,5 @@
 {
-  "name": "tstracker",
+  "name": "@hoda5/tracker",
   "version": "1.0.0",
   "description": "",
   "main": "dist/tracker.js",
