@@ -2,6 +2,16 @@
 /////////////////////////////////////////////////
 // adapted from http://docs.meteor.com/#tracker //
 /////////////////////////////////////////////////
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -38,6 +48,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var React = require("react");
+// tslint:disable-next-line:variable-name
 var Tracker = {
     active: false,
     currentComputation: null,
@@ -111,7 +123,7 @@ var Tracker = {
     },
     autorun: function (f, options) {
         if (typeof f !== "function") {
-            throw new Error("Tracker.autorun requires a function argument");
+            throw new Error('Tracker.autorun requires a function argument');
         }
         options = options || {};
         var c = new Computation(f, Tracker.currentComputation, options.onError);
@@ -134,7 +146,7 @@ var Tracker = {
     },
     onInvalidate: function (f) {
         if (!Tracker.active) {
-            throw new Error("Tracker.onInvalidate requires a currentComputation");
+            throw new Error('Tracker.onInvalidate requires a currentComputation');
         }
         Tracker.currentComputation.onInvalidate(f);
     },
@@ -186,8 +198,8 @@ var Computation = /** @class */ (function () {
     }
     Computation.prototype.onInvalidate = function (f) {
         var _this = this;
-        if (typeof f !== "function") {
-            throw new Error("onInvalidate requires a function");
+        if (typeof f !== 'function') {
+            throw new Error('onInvalidate requires a function');
         }
         if (this.invalidated) {
             Tracker.nonreactive(function () { return f(_this); });
@@ -198,8 +210,8 @@ var Computation = /** @class */ (function () {
     };
     Computation.prototype.onStop = function (f) {
         var _this = this;
-        if (typeof f !== "function") {
-            throw new Error("onStop requires a function");
+        if (typeof f !== 'function') {
+            throw new Error('onStop requires a function');
         }
         if (this.stopped) {
             Tracker.nonreactive(function () { return f(_this); });
@@ -321,7 +333,7 @@ var Dependency = /** @class */ (function () {
     Dependency.prototype.hasDependents = function () {
         // tslint:disable-next-line
         for (var id in this.dependentsById) {
-            return true;
+            return id !== undefined;
         }
         return false;
     };
@@ -330,7 +342,7 @@ var Dependency = /** @class */ (function () {
             var _this = this;
             var err;
             return __generator(this, function (_a) {
-                err = new Error("timeout");
+                err = new Error('timeout');
                 return [2 /*return*/, new Promise(function (resolve, reject) {
                         var tm = timeout && setTimeout(function () {
                             reject(err);
@@ -349,6 +361,33 @@ var Dependency = /** @class */ (function () {
                     })];
             });
         });
+    };
+    Dependency.prototype.rx = function (render) {
+        var dep = this;
+        var fnRender = render;
+        // tslint:disable-next-line:max-classes-per-file
+        return /** @class */ (function (_super) {
+            __extends(class_1, _super);
+            function class_1() {
+                return _super !== null && _super.apply(this, arguments) || this;
+            }
+            class_1.prototype.componentWillMount = function () {
+                var _this = this;
+                this.comp = autorun(function () {
+                    dep.depend();
+                    _this.setState({});
+                });
+            };
+            class_1.prototype.componentWillUnmount = function () {
+                if (this.comp) {
+                    this.comp.stop();
+                }
+            };
+            class_1.prototype.render = function () {
+                return fnRender();
+            };
+            return class_1;
+        }(React.Component));
     };
     return Dependency;
 }());

@@ -1,3 +1,5 @@
+/// <reference types="react" />
+import * as React from "react";
 export interface IRunOptions {
     finishSynchronously?: boolean;
 }
@@ -9,9 +11,9 @@ export declare class Computation {
     invalidated: boolean;
     firstRun: boolean;
     id: number;
+    parent: Computation;
     private onInvalidateCallbacks;
     private onStopCallbacks;
-    private parent;
     private func;
     private onError?;
     private recomputing;
@@ -35,6 +37,24 @@ export declare class Dependency {
     changed(): void;
     hasDependents(): boolean;
     waitForNextChange(timeout?: number): Promise<{}>;
+    rx<T>(render: () => React.ReactElement<T>): {
+        new (props: T, context?: any): {
+            comp?: any;
+            componentWillMount(): void;
+            componentWillUnmount(): void;
+            render(): React.ReactElement<T>;
+            setState<K extends string>(state: any, callback?: (() => void) | undefined): void;
+            forceUpdate(callBack?: (() => void) | undefined): void;
+            props: Readonly<{
+                children?: React.ReactNode;
+            }> & Readonly<T>;
+            state: Readonly<any>;
+            context: any;
+            refs: {
+                [key: string]: React.ReactInstance;
+            };
+        };
+    };
 }
 /**
  * @callback Tracker.ComputationFunction
