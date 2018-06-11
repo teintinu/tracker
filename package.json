@@ -1,6 +1,6 @@
 {
   "name": "@hoda5/tracker",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "",
   "main": "dist/tracker.js",
   "types": "dist/tracker.d.ts",
@@ -20,16 +20,10 @@
   },
   "license": "ISC",
   "devDependencies": {
-    "@types/jest": "^22.2.2",
-    "@types/react": "^16.3.16",
-    "codecov.io": "^0.1.6",
-    "jest": "^22.4.3",
-    "nyc": "^11.6.0",
-    "react-test-renderer": "^16.4.0",
-    "source-map-support": "^0.5.4",
-    "ts-jest": "^22.4.2",
+    "@hoda5/hdev": "^1.0.7",
+    "@types/react": "^16.3.17",
     "tslint": "^5.9.1",
-    "typescript": "^2.8.1"
+    "typescript": "^2.9.1"
   },
   "jest": {
     "verbose": true,

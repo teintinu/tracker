@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import * as React from "react";
 export interface IRunOptions {
     finishSynchronously?: boolean;
@@ -43,8 +42,8 @@ export declare class Dependency {
             componentWillMount(): void;
             componentWillUnmount(): void;
             render(): React.ReactElement<T>;
-            setState<K extends string>(state: any, callback?: (() => void) | undefined): void;
-            forceUpdate(callBack?: (() => void) | undefined): void;
+            setState<K extends string | number | symbol>(state: any, callback?: () => void): void;
+            forceUpdate(callBack?: () => void): void;
             props: Readonly<{
                 children?: React.ReactNode;
             }> & Readonly<T>;
@@ -53,6 +52,16 @@ export declare class Dependency {
             refs: {
                 [key: string]: React.ReactInstance;
             };
+            componentDidMount?(): void;
+            shouldComponentUpdate?(nextProps: Readonly<T>, nextState: Readonly<any>, nextContext: any): boolean;
+            componentDidCatch?(error: Error, errorInfo: React.ErrorInfo): void;
+            getSnapshotBeforeUpdate?(prevProps: Readonly<T>, prevState: Readonly<any>): any;
+            componentDidUpdate?(prevProps: Readonly<T>, prevState: Readonly<any>, snapshot?: any): void;
+            UNSAFE_componentWillMount?(): void;
+            componentWillReceiveProps?(nextProps: Readonly<T>, nextContext: any): void;
+            UNSAFE_componentWillReceiveProps?(nextProps: Readonly<T>, nextContext: any): void;
+            componentWillUpdate?(nextProps: Readonly<T>, nextState: Readonly<any>, nextContext: any): void;
+            UNSAFE_componentWillUpdate?(nextProps: Readonly<T>, nextState: Readonly<any>, nextContext: any): void;
         };
     };
 }

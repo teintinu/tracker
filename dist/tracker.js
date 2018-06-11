@@ -339,8 +339,8 @@ var Dependency = /** @class */ (function () {
     };
     Dependency.prototype.waitForNextChange = function (timeout) {
         return __awaiter(this, void 0, void 0, function () {
-            var _this = this;
             var err;
+            var _this = this;
             return __generator(this, function (_a) {
                 err = new Error('timeout');
                 return [2 /*return*/, new Promise(function (resolve, reject) {
