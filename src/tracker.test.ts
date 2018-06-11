@@ -143,6 +143,29 @@ describe("tracker", () => {
         r.textContent('e', '3')
 
     });
+    it("dep.rx - nested", async () => {
+
+        let renderCount = 0;
+        const dep1 = new Dependency();
+        const dep2 = new Dependency();
+        const rxComp = dep1.rx(dep2.rx(() => {
+            renderCount++;
+            return React.createElement('div', { className: 'e' }, renderCount.toString());
+        }));
+        expect(renderCount).to.eql(0);
+        const r = reactRender(React.createElement(rxComp))
+        expect(renderCount).to.equal(1);
+        r.textContent('e', '1')
+
+        setTimeout(() => dep1.changed(), 1);
+        await dep1.waitForNextChange(50);
+        r.textContent('e', '2')
+
+        setTimeout(() => dep2.changed(), 1);
+        await dep2.waitForNextChange(50);
+        r.textContent('e', '3')
+
+    });
     it("dep.rx component", async () => {
 
         let renderCount = 0;
