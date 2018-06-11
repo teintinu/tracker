@@ -362,9 +362,8 @@ var Dependency = /** @class */ (function () {
             });
         });
     };
-    Dependency.prototype.rx = function (render) {
+    Dependency.prototype.rx = function (Component) {
         var dep = this;
-        var fnRender = render;
         // tslint:disable-next-line:max-classes-per-file
         return /** @class */ (function (_super) {
             __extends(class_1, _super);
@@ -384,7 +383,7 @@ var Dependency = /** @class */ (function () {
                 }
             };
             class_1.prototype.render = function () {
-                return fnRender();
+                return React.createElement(Component, this.props);
             };
             return class_1;
         }(React.Component));

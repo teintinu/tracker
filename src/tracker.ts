@@ -350,11 +350,10 @@ export class Dependency {
     });
   }
 
-  public rx<T>(render: () => React.ReactElement<T>) {
+  public rx<P>(Component: React.ComponentType<P>) {
     const dep = this;
-    const fnRender = render;
     // tslint:disable-next-line:max-classes-per-file
-    return class extends React.Component<T, any> {
+    return class extends React.Component<P, any> {
       public comp?: any;
       public componentWillMount() {
         this.comp = autorun(() => {
@@ -368,7 +367,7 @@ export class Dependency {
         }
       }
       public render() {
-        return fnRender();
+        return React.createElement(Component, this.props);
       }
     };
   }

@@ -121,16 +121,42 @@ describe("tracker", () => {
         }
     });
 
-    it("dep.rx", async () => {
+    it("dep.rx stateless component", async () => {
 
         let renderCount = 0;
         const dep = new Dependency();
         const rxComp = dep.rx(() => {
             renderCount++;
-            return React.createElement('div', {className: 'e'}, renderCount.toString());
+            return React.createElement('div', { className: 'e' }, renderCount.toString());
         });
         expect(renderCount).to.eql(0);
-        const r=reactRender(React.createElement(rxComp))
+        const r = reactRender(React.createElement(rxComp))
+        expect(renderCount).to.equal(1);
+        r.textContent('e', '1')
+
+        setTimeout(() => dep.changed(), 1);
+        await dep.waitForNextChange(50);
+        r.textContent('e', '2')
+
+        setTimeout(() => dep.changed(), 1);
+        await dep.waitForNextChange(50);
+        r.textContent('e', '3')
+
+    });
+    it("dep.rx component", async () => {
+
+        let renderCount = 0;
+        const dep = new Dependency();
+        const rxComp = dep.rx(
+            class extends React.Component<{}> {
+                render() {
+                    renderCount++;
+                    return React.createElement('div', { className: 'e' }, renderCount.toString());
+                }
+            }
+        );
+        expect(renderCount).to.eql(0);
+        const r = reactRender(React.createElement(rxComp))
         expect(renderCount).to.equal(1);
         r.textContent('e', '1')
 
