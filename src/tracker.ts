@@ -350,10 +350,10 @@ export class Dependency {
     });
   }
 
-  public rx<P>(Component: React.ComponentType<P>) {
+  public rx<P>(Component: React.ComponentType<P>): React.ComponentClass<P> {
     const dep = this;
     // tslint:disable-next-line:max-classes-per-file
-    return class extends React.Component<P, any> {
+    return class extends React.Component<P, {}, {}> {
       public comp?: any;
       public componentWillMount() {
         this.comp = autorun(() => {

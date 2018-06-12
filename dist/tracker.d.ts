@@ -36,34 +36,7 @@ export declare class Dependency {
     changed(): void;
     hasDependents(): boolean;
     waitForNextChange(timeout?: number): Promise<{}>;
-    rx<P>(Component: React.ComponentType<P>): {
-        new (props: P, context?: any): {
-            comp?: any;
-            componentWillMount(): void;
-            componentWillUnmount(): void;
-            render(): React.ReactElement<P>;
-            setState<K extends string | number | symbol>(state: any, callback?: () => void): void;
-            forceUpdate(callBack?: () => void): void;
-            props: Readonly<{
-                children?: React.ReactNode;
-            }> & Readonly<P>;
-            state: Readonly<any>;
-            context: any;
-            refs: {
-                [key: string]: React.ReactInstance;
-            };
-            componentDidMount?(): void;
-            shouldComponentUpdate?(nextProps: Readonly<P>, nextState: Readonly<any>, nextContext: any): boolean;
-            componentDidCatch?(error: Error, errorInfo: React.ErrorInfo): void;
-            getSnapshotBeforeUpdate?(prevProps: Readonly<P>, prevState: Readonly<any>): any;
-            componentDidUpdate?(prevProps: Readonly<P>, prevState: Readonly<any>, snapshot?: any): void;
-            UNSAFE_componentWillMount?(): void;
-            componentWillReceiveProps?(nextProps: Readonly<P>, nextContext: any): void;
-            UNSAFE_componentWillReceiveProps?(nextProps: Readonly<P>, nextContext: any): void;
-            componentWillUpdate?(nextProps: Readonly<P>, nextState: Readonly<any>, nextContext: any): void;
-            UNSAFE_componentWillUpdate?(nextProps: Readonly<P>, nextState: Readonly<any>, nextContext: any): void;
-        };
-    };
+    rx<P>(Component: React.ComponentType<P>): React.ComponentClass<P>;
 }
 /**
  * @callback Tracker.ComputationFunction
