@@ -125,12 +125,12 @@ describe("tracker", () => {
 
         let renderCount = 0;
         const dep = new Dependency();
-        const rxComp = dep.rx(() => {
+        const Comp = dep.rx(() => {
             renderCount++;
-            return React.createElement('div', { className: 'e' }, renderCount.toString());
+            return <div className="e">{renderCount}</div>;
         });
         expect(renderCount).to.eql(0);
-        const r = reactRender(React.createElement(rxComp))
+        const r = reactRender(<Comp />)
         expect(renderCount).to.equal(1);
         r.textContent('e', '1')
 
@@ -148,12 +148,12 @@ describe("tracker", () => {
         let renderCount = 0;
         const dep1 = new Dependency();
         const dep2 = new Dependency();
-        const rxComp = dep1.rx(dep2.rx(() => {
+        const Comp = dep1.rx(dep2.rx(() => {
             renderCount++;
-            return React.createElement('div', { className: 'e' }, renderCount.toString());
+            return <div className="e">{renderCount}</div>;
         }));
         expect(renderCount).to.eql(0);
-        const r = reactRender(React.createElement(rxComp))
+        const r = reactRender(<Comp />)
         expect(renderCount).to.equal(1);
         r.textContent('e', '1')
 
@@ -170,16 +170,16 @@ describe("tracker", () => {
 
         let renderCount = 0;
         const dep = new Dependency();
-        const rxComp = dep.rx(
+        const Comp = dep.rx(
             class extends React.Component<{}> {
                 render() {
                     renderCount++;
-                    return React.createElement('div', { className: 'e' }, renderCount.toString());
+                    return <div className="e">{renderCount}</div>;
                 }
             }
         );
         expect(renderCount).to.eql(0);
-        const r = reactRender(React.createElement(rxComp))
+        const r = reactRender(<Comp />)
         expect(renderCount).to.equal(1);
         r.textContent('e', '1')
 
