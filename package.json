@@ -6,6 +6,7 @@
   "types": "dist/tracker.d.ts",
   "scripts": {
     "build": "tsc",
+    "watch": "rm -rf dist ; tsc -p . --watch",
     "lint": "tslint --project .",
     "lintfix": "tslint --project . --fix",
     "test": "hdev test",
