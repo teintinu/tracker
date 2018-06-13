@@ -1,11 +1,10 @@
 {
   "name": "@hoda5/tracker",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "",
   "main": "dist/tracker.js",
   "types": "dist/tracker.d.ts",
   "scripts": {
-    "prepublish": "npm run build",
     "build": "tsc",
     "lint": "tslint --project .",
     "lintfix": "tslint --project . --fix",
