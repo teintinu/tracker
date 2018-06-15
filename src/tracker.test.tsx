@@ -185,10 +185,12 @@ describe("tracker", () => {
 
         setTimeout(() => dep.changed(), 1);
         await dep.waitForNextChange(50);
+        expect(renderCount).to.equal(2);
         r.textContent('e', '2')
 
         setTimeout(() => dep.changed(), 1);
         await dep.waitForNextChange(50);
+        expect(renderCount).to.equal(3);
         r.textContent('e', '3')
 
     });
