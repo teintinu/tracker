@@ -130,17 +130,17 @@ describe("tracker", () => {
             return <div className="e">{renderCount}</div>;
         });
         expect(renderCount).to.eql(0);
-        const r = reactRender(<Comp />)
+        const r = reactRender(<Comp />);
         expect(renderCount).to.equal(1);
-        r.textContent('e', '1')
+        r.textContent("e", "1");
 
         setTimeout(() => dep.changed(), 1);
         await dep.waitForNextChange(50);
-        r.textContent('e', '2')
+        r.textContent("e", "2");
 
         setTimeout(() => dep.changed(), 1);
         await dep.waitForNextChange(50);
-        r.textContent('e', '3')
+        r.textContent("e", "3");
 
     });
     it("dep.rx - nested", async () => {
@@ -153,17 +153,17 @@ describe("tracker", () => {
             return <div className="e">{renderCount}</div>;
         }));
         expect(renderCount).to.eql(0);
-        const r = reactRender(<Comp />)
+        const r = reactRender(<Comp />);
         expect(renderCount).to.equal(1);
-        r.textContent('e', '1')
+        r.textContent("e", "1");
 
         setTimeout(() => dep1.changed(), 1);
         await dep1.waitForNextChange(50);
-        r.textContent('e', '2')
+        r.textContent("e", "2");
 
         setTimeout(() => dep2.changed(), 1);
         await dep2.waitForNextChange(50);
-        r.textContent('e', '3')
+        r.textContent("e", "3");
 
     });
     it("dep.rx component", async () => {
@@ -172,26 +172,26 @@ describe("tracker", () => {
         const dep = new Dependency();
         const Comp = dep.rx(
             class extends React.Component<{}> {
-                render() {
+                public render() {
                     renderCount++;
                     return <div className="e">{renderCount}</div>;
                 }
-            }
+            },
         );
         expect(renderCount).to.eql(0);
-        const r = reactRender(<Comp />)
+        const r = reactRender(<Comp />);
         expect(renderCount).to.equal(1);
-        r.textContent('e', '1')
+        r.textContent("e", "1");
 
         setTimeout(() => dep.changed(), 1);
         await dep.waitForNextChange(50);
         expect(renderCount).to.equal(2);
-        r.textContent('e', '2')
+        r.textContent("e", "2");
 
         setTimeout(() => dep.changed(), 1);
         await dep.waitForNextChange(50);
         expect(renderCount).to.equal(3);
-        r.textContent('e', '3')
+        r.textContent("e", "3");
 
     });
 

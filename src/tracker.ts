@@ -90,7 +90,7 @@ const Tracker = {
   },
   autorun(f: (comp: Computation) => void, options?: IComputationOptions) {
     if (typeof f !== "function") {
-      throw new Error('Tracker.autorun requires a function argument');
+      throw new Error("Tracker.autorun requires a function argument");
     }
 
     options = options || {};
@@ -117,7 +117,7 @@ const Tracker = {
   },
   onInvalidate(f: () => void) {
     if (!Tracker.active) {
-      throw new Error('Tracker.onInvalidate requires a currentComputation');
+      throw new Error("Tracker.onInvalidate requires a currentComputation");
     }
 
     Tracker.currentComputation.onInvalidate(f);
@@ -186,8 +186,8 @@ export class Computation {
   }
 
   public onInvalidate(f: (comp: Computation) => void) {
-    if (typeof f !== 'function') {
-      throw new Error('onInvalidate requires a function');
+    if (typeof f !== "function") {
+      throw new Error("onInvalidate requires a function");
     }
 
     if (this.invalidated) {
@@ -198,8 +198,8 @@ export class Computation {
   }
 
   public onStop(f: (comp: Computation) => void) {
-    if (typeof f !== 'function') {
-      throw new Error('onStop requires a function');
+    if (typeof f !== "function") {
+      throw new Error("onStop requires a function");
     }
 
     if (this.stopped) {
@@ -331,7 +331,7 @@ export class Dependency {
   }
 
   public async waitForNextChange(timeout?: number) {
-    const err = new Error('timeout');
+    const err = new Error("timeout");
     return new Promise((resolve, reject) => {
       const tm = timeout && setTimeout(() => {
         reject(err);
