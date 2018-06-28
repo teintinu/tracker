@@ -123,7 +123,7 @@ var Tracker = {
     },
     autorun: function (f, options) {
         if (typeof f !== "function") {
-            throw new Error('Tracker.autorun requires a function argument');
+            throw new Error("Tracker.autorun requires a function argument");
         }
         options = options || {};
         var c = new Computation(f, Tracker.currentComputation, options.onError);
@@ -146,7 +146,7 @@ var Tracker = {
     },
     onInvalidate: function (f) {
         if (!Tracker.active) {
-            throw new Error('Tracker.onInvalidate requires a currentComputation');
+            throw new Error("Tracker.onInvalidate requires a currentComputation");
         }
         Tracker.currentComputation.onInvalidate(f);
     },
@@ -198,8 +198,8 @@ var Computation = /** @class */ (function () {
     }
     Computation.prototype.onInvalidate = function (f) {
         var _this = this;
-        if (typeof f !== 'function') {
-            throw new Error('onInvalidate requires a function');
+        if (typeof f !== "function") {
+            throw new Error("onInvalidate requires a function");
         }
         if (this.invalidated) {
             Tracker.nonreactive(function () { return f(_this); });
@@ -210,8 +210,8 @@ var Computation = /** @class */ (function () {
     };
     Computation.prototype.onStop = function (f) {
         var _this = this;
-        if (typeof f !== 'function') {
-            throw new Error('onStop requires a function');
+        if (typeof f !== "function") {
+            throw new Error("onStop requires a function");
         }
         if (this.stopped) {
             Tracker.nonreactive(function () { return f(_this); });
@@ -342,7 +342,7 @@ var Dependency = /** @class */ (function () {
             var err;
             var _this = this;
             return __generator(this, function (_a) {
-                err = new Error('timeout');
+                err = new Error("timeout");
                 return [2 /*return*/, new Promise(function (resolve, reject) {
                         var tm = timeout && setTimeout(function () {
                             reject(err);
@@ -357,6 +357,22 @@ var Dependency = /** @class */ (function () {
                                 resolve();
                                 icomp.stop();
                             }
+                        });
+                    })];
+            });
+        });
+    };
+    Dependency.prototype.ignoreNextChanges = function (timeout) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _this = this;
+            return __generator(this, function (_a) {
+                return [2 /*return*/, new Promise(function (resolve, reject) {
+                        var tm = timeout && setTimeout(function () {
+                            comp.stop();
+                            resolve();
+                        }, timeout);
+                        var comp = autorun(function (icomp) {
+                            _this.depend();
                         });
                     })];
             });

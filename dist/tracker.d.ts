@@ -36,6 +36,7 @@ export declare class Dependency {
     changed(): void;
     hasDependents(): boolean;
     waitForNextChange(timeout?: number): Promise<{}>;
+    ignoreNextChanges(timeout: number): Promise<{}>;
     rx<P>(Component: React.ComponentType<P>): React.ComponentClass<P>;
 }
 /**

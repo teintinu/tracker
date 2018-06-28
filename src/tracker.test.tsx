@@ -1,7 +1,6 @@
 
-import "@hoda5/hdev";
-
 import * as React from "react";
+import * as TestRenderer from "react-test-renderer";
 import { autorun, Dependency, flush } from "./tracker";
 
 describe("tracker", () => {
@@ -121,6 +120,17 @@ describe("tracker", () => {
         }
     });
 
+    it("ignoreNextChanges", async () => {
+        const dep = new Dependency();
+        setTimeout(() => dep.changed(), 3);
+        setTimeout(() => dep.changed(), 4);
+        setTimeout(() => dep.changed(), 5);
+        setTimeout(() => dep.changed(), 6);
+        await dep.ignoreNextChanges(50);
+        setTimeout(() => dep.changed(), 1);
+        await dep.waitForNextChange();
+    });
+
     it("dep.rx stateless component", async () => {
 
         let renderCount = 0;
@@ -129,18 +139,18 @@ describe("tracker", () => {
             renderCount++;
             return <div className="e">{renderCount}</div>;
         });
-        expect(renderCount).to.eql(0);
-        const r = reactRender(<Comp />);
-        expect(renderCount).to.equal(1);
-        r.textContent("e", "1");
+        expect(renderCount).toBe(0);
+        const r = TestRenderer.create(<Comp />);
+        expect(renderCount).toBe(1);
+        expect(r.root.findByProps({ className: "e" }).children).toEqual(["1"]);
 
         setTimeout(() => dep.changed(), 1);
         await dep.waitForNextChange(50);
-        r.textContent("e", "2");
+        expect(r.root.findByProps({ className: "e" }).children).toEqual(["2"]);
 
         setTimeout(() => dep.changed(), 1);
         await dep.waitForNextChange(50);
-        r.textContent("e", "3");
+        expect(r.root.findByProps({ className: "e" }).children).toEqual(["3"]);
 
     });
     it("dep.rx - nested", async () => {
@@ -152,18 +162,18 @@ describe("tracker", () => {
             renderCount++;
             return <div className="e">{renderCount}</div>;
         }));
-        expect(renderCount).to.eql(0);
-        const r = reactRender(<Comp />);
-        expect(renderCount).to.equal(1);
-        r.textContent("e", "1");
+        expect(renderCount).toBe(0);
+        const r = TestRenderer.create(<Comp />);
+        expect(renderCount).toBe(1);
+        expect(r.root.findByProps({ className: "e" }).children).toEqual(["1"]);
 
         setTimeout(() => dep1.changed(), 1);
         await dep1.waitForNextChange(50);
-        r.textContent("e", "2");
+        expect(r.root.findByProps({ className: "e" }).children).toEqual(["2"]);
 
         setTimeout(() => dep2.changed(), 1);
         await dep2.waitForNextChange(50);
-        r.textContent("e", "3");
+        expect(r.root.findByProps({ className: "e" }).children).toEqual(["3"]);
 
     });
     it("dep.rx component", async () => {
@@ -178,20 +188,20 @@ describe("tracker", () => {
                 }
             },
         );
-        expect(renderCount).to.eql(0);
-        const r = reactRender(<Comp />);
-        expect(renderCount).to.equal(1);
-        r.textContent("e", "1");
+        expect(renderCount).toBe(0);
+        const r = TestRenderer.create(<Comp />);
+        expect(renderCount).toBe(1);
+        expect(r.root.findByProps({ className: "e" }).children).toEqual(["1"]);
 
         setTimeout(() => dep.changed(), 1);
         await dep.waitForNextChange(50);
-        expect(renderCount).to.equal(2);
-        r.textContent("e", "2");
+        expect(renderCount).toBe(2);
+        expect(r.root.findByProps({ className: "e" }).children).toEqual(["2"]);
 
         setTimeout(() => dep.changed(), 1);
         await dep.waitForNextChange(50);
-        expect(renderCount).to.equal(3);
-        r.textContent("e", "3");
+        expect(renderCount).toBe(3);
+        expect(r.root.findByProps({ className: "e" }).children).toEqual(["3"]);
 
     });
 

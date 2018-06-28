@@ -350,6 +350,18 @@ export class Dependency {
     });
   }
 
+  public async ignoreNextChanges(timeout: number) {
+    return new Promise((resolve, reject) => {
+      const tm = timeout && setTimeout(() => {
+        comp.stop();
+        resolve();
+      }, timeout);
+      const comp = autorun((icomp) => {
+        this.depend();
+      });
+    });
+  }
+
   public rx<P>(Component: React.ComponentType<P>): React.ComponentClass<P> {
     const dep = this;
     // tslint:disable-next-line:max-classes-per-file
