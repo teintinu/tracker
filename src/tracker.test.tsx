@@ -119,6 +119,33 @@ describe("tracker", () => {
             if (err.message !== "timeout") { throw err; }
         }
     });
+    it("waitForNextChange-cond", async () => {
+        const dep = new Dependency();
+        let x = 1;
+        setTimeout(() => { x++; dep.changed(); }, 3);
+        setTimeout(() => { x++; dep.changed(); }, 30);
+        await dep.waitForNextChange(() => x === 3);
+    });
+    it("waitForNextChange-cond - timeout ok", async () => {
+        const dep = new Dependency();
+        let x = 1;
+        setTimeout(() => { x++; dep.changed(); }, 3);
+        setTimeout(() => { x++; dep.changed(); }, 30);
+        await dep.waitForNextChange(() => x === 3, 50);
+    });
+    it("waitForNextChange-cond - timeout fail", async () => {
+        const dep = new Dependency();
+        let x = 1;
+        setTimeout(() => { x++; dep.changed(); }, 3);
+        setTimeout(() => { x++; dep.changed(); }, 50);
+        try {
+            await dep.waitForNextChange(() => x === 3, 1);
+            throw new Error("timeout expected");
+        } catch (err) {
+            // console.dir(err)
+            if (err.message !== "timeout") { throw err; }
+        }
+    });
 
     it("ignoreNextChanges", async () => {
         const dep = new Dependency();

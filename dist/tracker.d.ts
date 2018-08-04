@@ -1,3 +1,4 @@
+/// <reference types="react" />
 import * as React from "react";
 export interface IRunOptions {
     finishSynchronously?: boolean;
@@ -35,7 +36,8 @@ export declare class Dependency {
     depend(computation?: Computation): boolean;
     changed(): void;
     hasDependents(): boolean;
-    waitForNextChange(timeout?: number): Promise<{}>;
+    waitForNextChange(timeout?: number): any;
+    waitForNextChange(condition: () => boolean, timeout?: number): any;
     ignoreNextChanges(timeout: number): Promise<{}>;
     rx<P>(Component: React.ComponentType<P>): React.ComponentClass<P>;
 }

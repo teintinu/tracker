@@ -330,7 +330,11 @@ export class Dependency {
     return false;
   }
 
-  public async waitForNextChange(timeout?: number) {
+  public async waitForNextChange(timeout?: number);
+  public async waitForNextChange(condition: () => boolean, timeout?: number);
+  public async waitForNextChange(a?: any, b?: any) {
+    const condition: () => boolean = typeof a === "function" ? a : undefined;
+    const timeout: number = condition ? b : a;
     const err = new Error("timeout");
     return new Promise((resolve, reject) => {
       const tm = timeout && setTimeout(() => {
@@ -343,6 +347,7 @@ export class Dependency {
           if (tm) {
             clearTimeout(tm);
           }
+          if (condition && (!condition())) return;
           resolve();
           icomp.stop();
         }
