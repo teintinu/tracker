@@ -388,6 +388,39 @@ export class Dependency {
       }
     };
   }
+
+  public get ReactRX(): React.ComponentClass<{ debouce?: number }> {
+    const dep = this;
+    // tslint:disable-next-line:max-classes-per-file
+    return class extends React.Component<{ debouce?: number }, {}, {}> {
+      public comp?: any;
+      public tm?: any;
+      public componentWillMount() {
+        this.comp = autorun(() => {
+          dep.depend();
+          if (this.props.debouce) {
+            clearTimeout(this.tm);
+            this.tm = setTimeout(() => {
+              this.tm = undefined;
+              this.setState({});
+            }, this.tm);
+          }
+          this.setState({});
+        });
+      }
+      public componentWillUnmount() {
+        if (this.comp) {
+          this.comp.stop();
+        }
+      }
+      public render() {
+        return this.props.children;
+        // const c = this.props.children;
+        // if (Array.isArray(c)) return c.map((i) => i);
+        // else return c;
+      }
+    };
+  }
 }
 
 /**
