@@ -384,40 +384,8 @@ export class Dependency {
         }
       }
       public render() {
-        return React.createElement(Component, this.props);
-      }
-    };
-  }
-
-  public get ReactRX(): React.ComponentClass<{ debouce?: number }> {
-    const dep = this;
-    // tslint:disable-next-line:max-classes-per-file
-    return class extends React.Component<{ debouce?: number }, {}, {}> {
-      public comp?: any;
-      public tm?: any;
-      public componentWillMount() {
-        this.comp = autorun(() => {
-          dep.depend();
-          if (this.props.debouce) {
-            clearTimeout(this.tm);
-            this.tm = setTimeout(() => {
-              this.tm = undefined;
-              this.setState({});
-            }, this.tm);
-          }
-          this.setState({});
-        });
-      }
-      public componentWillUnmount() {
-        if (this.comp) {
-          this.comp.stop();
-        }
-      }
-      public render() {
-        return this.props.children;
-        // const c = this.props.children;
-        // if (Array.isArray(c)) return c.map((i) => i);
-        // else return c;
+        return React.createElement(ErrorBoundary, null,
+          React.createElement(Component, this.props));
       }
     };
   }
@@ -447,4 +415,26 @@ export function autorun(f: (comp: Computation) => void, options?: IComputationOp
 
 export function flush() {
   Tracker.flush();
+}
+
+// tslint:disable-next-line:max-classes-per-file
+class ErrorBoundary extends React.Component<{}, { hasError: false | string }> {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  public componentDidCatch(error, info) {
+    this.setState({
+      hasError: JSON.stringify({
+        info,
+        error: error.stack ? error.stack.toString() : error.message,
+      }, null, 2),
+    });
+  }
+
+  public render() {
+    if (this.state.hasError) return React.createElement("pre", null, this.state.hasError);
+    return this.props.children;
+  }
 }

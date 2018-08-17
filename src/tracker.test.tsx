@@ -107,15 +107,15 @@ describe("tracker", () => {
 
             autorun((comp) => {
                 comp.
-                setTimeout( comp.async( () => {
-                    dep.depend();
-                    c2++;
-                    if (c1 !== c2) {
-                        reject(new Error(["falha, c1=", c1, , " c2=", c2].join("")));
-                    } else if (c2 === 4) {
-                        resolve();
-                    }
-                }), 1);
+                    setTimeout(comp.async(() => {
+                        dep.depend();
+                        c2++;
+                        if (c1 !== c2) {
+                            reject(new Error(["falha, c1=", c1, , " c2=", c2].join("")));
+                        } else if (c2 === 4) {
+                            resolve();
+                        }
+                    }), 1);
             });
 
             c1++;
@@ -265,29 +265,37 @@ describe("tracker", () => {
 
     });
 
-    it("dep.rx children", async () => {
+    it("dep.rx error", async () => {
 
         let renderCount = 0;
         const dep = new Dependency();
-        const Comp = () => {
+        const Comp = dep.rx(() => {
             renderCount++;
-            return <dep.ReactRX><div className="e">{renderCount}</div></dep.ReactRX>;
-        };
+            if (renderCount === 2) return "OK";
+            throw new Error(["@erro", renderCount, "@"].join(""));
+        });
         expect(renderCount).toBe(0);
         const r = TestRenderer.create(<Comp />);
-        expect(renderCount).toBe(1);
-        expect(r.root.findByProps({ className: "e" }).children).toEqual(["1"]);
 
-        setTimeout(() => dep.changed(), 1);
-        await dep.waitForNextChange(50);
-        expect(r.root.findByProps({ className: "e" }).children).toEqual(["2"]);
+        // expect(renderCount).toBe(1);
+        // const res1 = r.toJSON();
+        // expect(res1.type).toEqual("pre");
+        // expect(res1.children[0].split("@erro1@").length).toEqual(2);
 
-        setTimeout(() => dep.changed(), 1);
-        await dep.waitForNextChange(50);
-        expect(r.root.findByProps({ className: "e" }).children).toEqual(["3"]);
+        // setTimeout(() => dep.changed(), 1);
+        // await dep.waitForNextChange(50);
+        // expect(renderCount).toBe(2);
+        // const res1 = r.toJSON();
+        // expect(res1.type).toEqual("OK");
+
+        // setTimeout(() => dep.changed(), 1);
+        // await dep.waitForNextChange(50);
+        // expect(renderCount).toBe(2);
+        // const res1 = r.toJSON();
+        // expect(res1.type).toEqual("pre");
+        // expect(res1.children[0].split("@erro2@").length).toEqual(2);
 
     });
-
 });
 
 const expected1: any = {};
