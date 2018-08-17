@@ -403,7 +403,7 @@ var Dependency = /** @class */ (function () {
                 }
             };
             class_1.prototype.render = function () {
-                return React.createElement(Component, this.props);
+                return React.createElement(ErrorBoundary, null, React.createElement(Component, this.props));
             };
             return class_1;
         }(React.Component));
@@ -436,4 +436,27 @@ function flush() {
     Tracker.flush();
 }
 exports.flush = flush;
+// tslint:disable-next-line:max-classes-per-file
+var ErrorBoundary = /** @class */ (function (_super) {
+    __extends(ErrorBoundary, _super);
+    function ErrorBoundary(props) {
+        var _this = _super.call(this, props) || this;
+        _this.state = { hasError: false };
+        return _this;
+    }
+    ErrorBoundary.prototype.componentDidCatch = function (error, info) {
+        this.setState({
+            hasError: JSON.stringify({
+                info: info,
+                error: error.stack ? error.stack.toString() : error.message,
+            }, null, 2),
+        });
+    };
+    ErrorBoundary.prototype.render = function () {
+        if (this.state.hasError)
+            return React.createElement("pre", null, this.state.hasError);
+        return this.props.children;
+    };
+    return ErrorBoundary;
+}(React.Component));
 //# sourceMappingURL=tracker.js.map

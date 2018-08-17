@@ -98,38 +98,38 @@ describe("tracker", () => {
         });
     });
 
-    it.skip("autorun/async dependency", async () => {
-        return new Promise((resolve, reject) => {
-            let c1 = 0;
-            let c2 = 0;
-            const dep = new Dependency();
-            c1++;
+    // it.skip("autorun/async dependency", async () => {
+    //     return new Promise((resolve, reject) => {
+    //         let c1 = 0;
+    //         let c2 = 0;
+    //         const dep = new Dependency();
+    //         c1++;
 
-            autorun((comp) => {
-                comp.
-                    setTimeout(comp.async(() => {
-                        dep.depend();
-                        c2++;
-                        if (c1 !== c2) {
-                            reject(new Error(["falha, c1=", c1, , " c2=", c2].join("")));
-                        } else if (c2 === 4) {
-                            resolve();
-                        }
-                    }), 1);
-            });
+    //         autorun((comp) => {
+    //             comp.
+    //                 setTimeout(comp.async(() => {
+    //                     dep.depend();
+    //                     c2++;
+    //                     if (c1 !== c2) {
+    //                         reject(new Error(["falha, c1=", c1, , " c2=", c2].join("")));
+    //                     } else if (c2 === 4) {
+    //                         resolve();
+    //                     }
+    //                 }), 1);
+    //         });
 
-            c1++;
-            dep.changed();
-            c1++;
-            c2++;
-            dep.changed();
+    //         c1++;
+    //         dep.changed();
+    //         c1++;
+    //         c2++;
+    //         dep.changed();
 
-            setTimeout(() => {
-                c1++;
-                dep.changed();
-            }, 11);
-        });
-    });
+    //         setTimeout(() => {
+    //             c1++;
+    //             dep.changed();
+    //         }, 11);
+    //     });
+    // });
 
     it("waitForNextChange", async () => {
         const dep = new Dependency();
@@ -269,9 +269,8 @@ describe("tracker", () => {
 
         let renderCount = 0;
         const dep = new Dependency();
-        const Comp = dep.rx(() => {
+        const Comp = dep.rx((p: {}) => {
             renderCount++;
-            if (renderCount === 2) return "OK";
             throw new Error(["@erro", renderCount, "@"].join(""));
         });
         expect(renderCount).toBe(0);
