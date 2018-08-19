@@ -49,6 +49,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = require("react");
+var h5debug_1 = require("@hoda5/h5debug");
 // tslint:disable-next-line:variable-name
 var Tracker = {
     active: false,
@@ -121,12 +122,12 @@ var Tracker = {
             }
         }
     },
-    autorun: function (f, options) {
+    autorun: function (h5debug_name, f, options) {
         if (typeof f !== "function") {
             throw new Error("Tracker.autorun requires a function argument");
         }
         options = options || {};
-        var c = new Computation(f, Tracker.currentComputation, options.onError);
+        var c = new Computation(h5debug_name, f, Tracker.currentComputation, options.onError);
         if (Tracker.active) {
             Tracker.onInvalidate(function () {
                 c.stop();
@@ -173,7 +174,10 @@ function requireFlush() {
     }
 }
 var Computation = /** @class */ (function () {
-    function Computation(f, parent, onError) {
+    function Computation(h5debug_name, f, parent, onError) {
+        if (h5debug_1.h5debug["@hoda5/tracker"]) {
+            this.h5debug_name = h5debug_name;
+        }
         this.stopped = false;
         this.invalidated = false;
         this.firstRun = true;
@@ -303,8 +307,11 @@ var Computation = /** @class */ (function () {
 exports.Computation = Computation;
 // tslint:disable-next-line
 var Dependency = /** @class */ (function () {
-    function Dependency() {
+    function Dependency(h5debug_name) {
         this.dependentsById = Object.create(null);
+        if (h5debug_1.h5debug["@hoda5/tracker"]) {
+            this.h5debug_name = h5debug_name;
+        }
     }
     Dependency.prototype.depend = function (computation) {
         var _this = this;
@@ -315,6 +322,9 @@ var Dependency = /** @class */ (function () {
             computation = Tracker.currentComputation;
         }
         var id = computation.id;
+        if (h5debug_1.h5debug["@hoda5/tracker"]) {
+            h5debug_1.h5debug["@hoda5/tracker"](this.h5debug_name, ".depend() on ", computation.h5debug_name);
+        }
         if (!(id in this.dependentsById)) {
             this.dependentsById[id] = computation;
             computation.onInvalidate(function () {
@@ -327,6 +337,10 @@ var Dependency = /** @class */ (function () {
     Dependency.prototype.changed = function () {
         // tslint:disable-next-line
         for (var id in this.dependentsById) {
+            if (h5debug_1.h5debug["@hoda5/tracker"]) {
+                var computation = this.dependentsById[id];
+                h5debug_1.h5debug["@hoda5/tracker"](this.h5debug_name, ".changed() invalidating ", computation.h5debug_name);
+            }
             this.dependentsById[id].invalidate();
         }
     };
@@ -348,7 +362,7 @@ var Dependency = /** @class */ (function () {
                             reject(err);
                             comp.stop();
                         }, timeout);
-                        var comp = autorun(function (icomp) {
+                        var comp = autorun(_this.h5debug_name + ".waitForNextChange", function (icomp) {
                             _this.depend();
                             if (!icomp.firstRun) {
                                 if (tm) {
@@ -371,7 +385,7 @@ var Dependency = /** @class */ (function () {
                             comp.stop();
                             resolve();
                         }, timeout);
-                        var comp = autorun(function (icomp) {
+                        var comp = autorun(_this.h5debug_name + ".ignoreNextChanges", function (icomp) {
                             _this.depend();
                         });
                     })];
@@ -388,7 +402,7 @@ var Dependency = /** @class */ (function () {
             }
             class_1.prototype.componentWillMount = function () {
                 var _this = this;
-                this.comp = autorun(function () {
+                this.comp = autorun(dep.h5debug_name + ".rx", function () {
                     dep.depend();
                     _this.setState({});
                 });
@@ -424,8 +438,8 @@ exports.Dependency = Dependency;
  * thrown. Defaults to the error being logged to the console.
  * @returns {Tracker.Computation}
  */
-function autorun(f, options) {
-    return Tracker.autorun(f, options);
+function autorun(h5debug_name, f, options) {
+    return Tracker.autorun(h5debug_name, f, options);
 }
 exports.autorun = autorun;
 function flush() {

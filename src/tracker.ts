@@ -3,6 +3,7 @@
 /////////////////////////////////////////////////
 
 import * as React from "react";
+import { h5debug } from "@hoda5/h5debug";
 
 export interface IRunOptions {
   finishSynchronously?: boolean;
@@ -88,7 +89,8 @@ const Tracker = {
       }
     }
   },
-  autorun(f: (comp: Computation) => void, options?: IComputationOptions) {
+  autorun(h5debug_name, f: (comp: Computation) => void, options?: IComputationOptions) {
+
     if (typeof f !== "function") {
       throw new Error("Tracker.autorun requires a function argument");
     }
@@ -96,7 +98,7 @@ const Tracker = {
     options = options || {};
 
     const c = new Computation(
-      f, Tracker.currentComputation, options.onError);
+      h5debug_name, f, Tracker.currentComputation, options.onError);
 
     if (Tracker.active) {
       Tracker.onInvalidate(() => {
@@ -160,7 +162,14 @@ export class Computation {
   private onError?: (error: Error) => void;
   private recomputing: boolean;
 
-  constructor(f: (comp: Computation) => void, parent: Computation, onError?: (error: Error) => void) {
+  constructor(
+    h5debug_name: string,
+    f: (comp: Computation) => void,
+    parent: Computation,
+    onError?: (error: Error) => void) {
+    if (h5debug["@hoda5/tracker"]) {
+      (this as any).h5debug_name = h5debug_name;
+    }
     this.stopped = false;
     this.invalidated = false;
     this.firstRun = true;
@@ -292,8 +301,11 @@ export class Dependency {
   public dependentsById: {
     [name: string]: Computation,
   };
-  constructor() {
+  constructor(h5debug_name) {
     this.dependentsById = Object.create(null);
+    if (h5debug["@hoda5/tracker"]) {
+      (this as any).h5debug_name = h5debug_name;
+    }
   }
 
   public depend(computation?: Computation) {
@@ -305,6 +317,12 @@ export class Dependency {
       computation = Tracker.currentComputation;
     }
     const id = computation.id;
+    if (h5debug["@hoda5/tracker"]) {
+      h5debug["@hoda5/tracker"](
+        (this as any).h5debug_name, ".depend() on ", (computation as any).h5debug_name,
+      );
+    }
+
     if (!(id in this.dependentsById)) {
       this.dependentsById[id] = computation;
       computation.onInvalidate(() => {
@@ -318,6 +336,12 @@ export class Dependency {
   public changed() {
     // tslint:disable-next-line
     for (const id in this.dependentsById) {
+      if (h5debug["@hoda5/tracker"]) {
+        const computation = this.dependentsById[id];
+        h5debug["@hoda5/tracker"](
+          (this as any).h5debug_name, ".changed() invalidating ", (computation as any).h5debug_name,
+        );
+      }
       this.dependentsById[id].invalidate();
     }
   }
@@ -337,7 +361,7 @@ export class Dependency {
         reject(err);
         comp.stop();
       }, timeout);
-      const comp = autorun((icomp) => {
+      const comp = autorun((this as any).h5debug_name + ".waitForNextChange", (icomp) => {
         this.depend();
         if (!icomp.firstRun) {
           if (tm) {
@@ -356,7 +380,7 @@ export class Dependency {
         comp.stop();
         resolve();
       }, timeout);
-      const comp = autorun((icomp) => {
+      const comp = autorun((this as any).h5debug_name + ".ignoreNextChanges", (icomp) => {
         this.depend();
       });
     });
@@ -368,7 +392,7 @@ export class Dependency {
     return class extends React.Component<P, {}, {}> {
       public comp?: any;
       public componentWillMount() {
-        this.comp = autorun(() => {
+        this.comp = autorun((dep as any).h5debug_name + ".rx", () => {
           dep.depend();
           this.setState({});
         });
@@ -403,8 +427,8 @@ export class Dependency {
  * @returns {Tracker.Computation}
  */
 
-export function autorun(f: (comp: Computation) => void, options?: IComputationOptions) {
-  return Tracker.autorun(f, options);
+export function autorun(h5debug_name: string, f: (comp: Computation) => void, options?: IComputationOptions) {
+  return Tracker.autorun(h5debug_name, f, options);
 }
 
 export function flush() {

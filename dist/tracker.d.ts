@@ -16,7 +16,7 @@ export declare class Computation {
     private func;
     private onError?;
     private recomputing;
-    constructor(f: (comp: Computation) => void, parent: Computation, onError?: (error: Error) => void);
+    constructor(h5debug_name: string, f: (comp: Computation) => void, parent: Computation, onError?: (error: Error) => void);
     onInvalidate(f: (comp: Computation) => void): void;
     onStop(f: (comp: Computation) => void): void;
     invalidate(): void;
@@ -31,7 +31,7 @@ export declare class Dependency {
     dependentsById: {
         [name: string]: Computation;
     };
-    constructor();
+    constructor(h5debug_name: any);
     depend(computation?: Computation): boolean;
     changed(): void;
     hasDependents(): boolean;
@@ -56,5 +56,5 @@ export declare class Dependency {
  * thrown. Defaults to the error being logged to the console.
  * @returns {Tracker.Computation}
  */
-export declare function autorun(f: (comp: Computation) => void, options?: IComputationOptions): Computation;
+export declare function autorun(h5debug_name: string, f: (comp: Computation) => void, options?: IComputationOptions): Computation;
 export declare function flush(): void;

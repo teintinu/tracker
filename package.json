@@ -1,6 +1,6 @@
 {
   "name": "@hoda5/tracker",
-  "version": "1.0.10",
+  "version": "1.0.12",
   "description": "",
   "main": "dist/tracker.js",
   "types": "dist/tracker.d.ts",
@@ -20,6 +20,7 @@
   },
   "license": "ISC",
   "dependencies": {
+    "@hoda5/h5debug": "^1.0.3",
     "react": "^16.4.1"
   },
   "devDependencies": {
