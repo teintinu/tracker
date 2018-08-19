@@ -351,11 +351,13 @@ var Dependency = /** @class */ (function () {
         }
         return false;
     };
-    Dependency.prototype.waitForNextChange = function (timeout) {
+    Dependency.prototype.waitForNextChange = function (a, b) {
         return __awaiter(this, void 0, void 0, function () {
-            var err;
+            var condition, timeout, err;
             var _this = this;
             return __generator(this, function (_a) {
+                condition = typeof a === "function" ? a : undefined;
+                timeout = condition ? b : a;
                 err = new Error("timeout");
                 return [2 /*return*/, new Promise(function (resolve, reject) {
                         var tm = timeout && setTimeout(function () {
@@ -368,6 +370,8 @@ var Dependency = /** @class */ (function () {
                                 if (tm) {
                                     clearTimeout(tm);
                                 }
+                                if (condition && (!condition()))
+                                    return;
                                 resolve();
                                 icomp.stop();
                             }
@@ -413,7 +417,7 @@ var Dependency = /** @class */ (function () {
                 }
             };
             class_1.prototype.render = function () {
-                return React.createElement(Component, this.props);
+                return React.createElement(ErrorBoundary, null, React.createElement(Component, this.props));
             };
             return class_1;
         }(React.Component));
@@ -446,4 +450,27 @@ function flush() {
     Tracker.flush();
 }
 exports.flush = flush;
+// tslint:disable-next-line:max-classes-per-file
+var ErrorBoundary = /** @class */ (function (_super) {
+    __extends(ErrorBoundary, _super);
+    function ErrorBoundary(props) {
+        var _this = _super.call(this, props) || this;
+        _this.state = { hasError: false };
+        return _this;
+    }
+    ErrorBoundary.prototype.componentDidCatch = function (error, info) {
+        this.setState({
+            hasError: JSON.stringify({
+                info: info,
+                error: error.stack ? error.stack.toString() : error.message,
+            }, null, 2),
+        });
+    };
+    ErrorBoundary.prototype.render = function () {
+        if (this.state.hasError)
+            return React.createElement("pre", null, this.state.hasError);
+        return this.props.children;
+    };
+    return ErrorBoundary;
+}(React.Component));
 //# sourceMappingURL=tracker.js.map

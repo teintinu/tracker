@@ -133,6 +133,39 @@ describe("tracker", () => {
         });
     });
 
+    // it.skip("autorun/async dependency", async () => {
+    //     return new Promise((resolve, reject) => {
+    //         let c1 = 0;
+    //         let c2 = 0;
+    //         const dep = new Dependency();
+    //         c1++;
+
+    //         autorun((comp) => {
+    //             comp.
+    //                 setTimeout(comp.async(() => {
+    //                     dep.depend();
+    //                     c2++;
+    //                     if (c1 !== c2) {
+    //                         reject(new Error(["falha, c1=", c1, , " c2=", c2].join("")));
+    //                     } else if (c2 === 4) {
+    //                         resolve();
+    //                     }
+    //                 }), 1);
+    //         });
+
+    //         c1++;
+    //         dep.changed();
+    //         c1++;
+    //         c2++;
+    //         dep.changed();
+
+    //         setTimeout(() => {
+    //             c1++;
+    //             dep.changed();
+    //         }, 11);
+    //     });
+    // });
+
     it("waitForNextChange", async () => {
         const dep = new Dependency("dep");
         setTimeout(() => dep.changed(), 3);
@@ -158,6 +191,50 @@ describe("tracker", () => {
         setTimeout(() => dep.changed(), 30);
         try {
             await dep.waitForNextChange(1);
+            throw new Error("timeout expected");
+        } catch (err) {
+            // console.dir(err)
+            if (err.message !== "timeout") { throw err; }
+            expect(h5debug["@hoda5/tracker"].history()).toEqual([
+                "dep.depend() on dep.waitForNextChange",
+            ]);
+        }
+    });
+    it("waitForNextChange-cond", async () => {
+        const dep = new Dependency("dep");
+        let x = 1;
+        setTimeout(() => { x++; dep.changed(); }, 3);
+        setTimeout(() => { x++; dep.changed(); }, 30);
+        await dep.waitForNextChange(() => x === 3);
+        expect(h5debug["@hoda5/tracker"].history()).toEqual([
+            "dep.depend() on dep.waitForNextChange",
+            "dep.changed() invalidating dep.waitForNextChange",
+            "dep.depend() on dep.waitForNextChange",
+            "dep.changed() invalidating dep.waitForNextChange",
+            "dep.depend() on dep.waitForNextChange",
+        ]);
+    });
+    it("waitForNextChange-cond - timeout ok", async () => {
+        const dep = new Dependency("dep");
+        let x = 1;
+        setTimeout(() => { x++; dep.changed(); }, 3);
+        setTimeout(() => { x++; dep.changed(); }, 30);
+        await dep.waitForNextChange(() => x === 3, 50);
+        expect(h5debug["@hoda5/tracker"].history()).toEqual([
+            "dep.depend() on dep.waitForNextChange",
+            "dep.changed() invalidating dep.waitForNextChange",
+            "dep.depend() on dep.waitForNextChange",
+            "dep.changed() invalidating dep.waitForNextChange",
+            "dep.depend() on dep.waitForNextChange",
+        ]);
+    });
+    it("waitForNextChange-cond - timeout fail", async () => {
+        const dep = new Dependency("dep");
+        let x = 1;
+        setTimeout(() => { x++; dep.changed(); }, 3);
+        setTimeout(() => { x++; dep.changed(); }, 50);
+        try {
+            await dep.waitForNextChange(() => x === 3, 1);
             throw new Error("timeout expected");
         } catch (err) {
             // console.dir(err)
@@ -305,4 +382,37 @@ describe("tracker", () => {
 
     });
 
+    it("dep.rx error", async () => {
+
+        let renderCount = 0;
+        const dep = new Dependency("dep");
+        const Comp = dep.rx((p: {}) => {
+            renderCount++;
+            throw new Error(["@erro", renderCount, "@"].join(""));
+        });
+        expect(renderCount).toBe(0);
+        const r = TestRenderer.create(<Comp />);
+
+        // expect(renderCount).toBe(1);
+        // const res1 = r.toJSON();
+        // expect(res1.type).toEqual("pre");
+        // expect(res1.children[0].split("@erro1@").length).toEqual(2);
+
+        // setTimeout(() => dep.changed(), 1);
+        // await dep.waitForNextChange(50);
+        // expect(renderCount).toBe(2);
+        // const res1 = r.toJSON();
+        // expect(res1.type).toEqual("OK");
+
+        // setTimeout(() => dep.changed(), 1);
+        // await dep.waitForNextChange(50);
+        // expect(renderCount).toBe(2);
+        // const res1 = r.toJSON();
+        // expect(res1.type).toEqual("pre");
+        // expect(res1.children[0].split("@erro2@").length).toEqual(2);
+
+        expect(h5debug["@hoda5/tracker"].history()).toEqual([
+            "dep.depend() on dep.rx",
+        ]);
+    });
 });

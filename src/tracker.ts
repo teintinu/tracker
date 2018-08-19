@@ -354,7 +354,11 @@ export class Dependency {
     return false;
   }
 
-  public async waitForNextChange(timeout?: number) {
+  public async waitForNextChange(timeout?: number);
+  public async waitForNextChange(condition: () => boolean, timeout?: number);
+  public async waitForNextChange(a?: any, b?: any) {
+    const condition: () => boolean = typeof a === "function" ? a : undefined;
+    const timeout: number = condition ? b : a;
     const err = new Error("timeout");
     return new Promise((resolve, reject) => {
       const tm = timeout && setTimeout(() => {
@@ -367,6 +371,7 @@ export class Dependency {
           if (tm) {
             clearTimeout(tm);
           }
+          if (condition && (!condition())) return;
           resolve();
           icomp.stop();
         }
@@ -403,7 +408,8 @@ export class Dependency {
         }
       }
       public render() {
-        return React.createElement(Component, this.props);
+        return React.createElement(ErrorBoundary, null,
+          React.createElement(Component, this.props));
       }
     };
   }
@@ -433,4 +439,26 @@ export function autorun(h5debug_name: string, f: (comp: Computation) => void, op
 
 export function flush() {
   Tracker.flush();
+}
+
+// tslint:disable-next-line:max-classes-per-file
+class ErrorBoundary extends React.Component<{}, { hasError: false | string }> {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  public componentDidCatch(error, info) {
+    this.setState({
+      hasError: JSON.stringify({
+        info,
+        error: error.stack ? error.stack.toString() : error.message,
+      }, null, 2),
+    });
+  }
+
+  public render() {
+    if (this.state.hasError) return React.createElement("pre", null, this.state.hasError);
+    return this.props.children;
+  }
 }
