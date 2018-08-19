@@ -16,7 +16,7 @@ export declare class Computation {
     private func;
     private onError?;
     private recomputing;
-    constructor(h5debug_name: string, f: (comp: Computation) => void, parent: Computation, onError?: (error: Error) => void);
+    constructor(h5debugname: string, f: (comp: Computation) => void, parent: Computation, onError?: (error: Error) => void);
     onInvalidate(f: (comp: Computation) => void): void;
     onStop(f: (comp: Computation) => void): void;
     invalidate(): void;
@@ -31,13 +31,13 @@ export declare class Dependency {
     dependentsById: {
         [name: string]: Computation;
     };
-    constructor(h5debug_name: any);
+    constructor(h5debugname: any);
     depend(computation?: Computation): boolean;
     changed(): void;
     hasDependents(): boolean;
-    waitForNextChange(timeout?: number): any;
-    waitForNextChange(condition: () => boolean, timeout?: number): any;
-    ignoreNextChanges(timeout: number): Promise<{}>;
+    waitForNextChange(timeout?: number): Promise<void>;
+    waitForNextChange(condition: () => boolean, timeout?: number): Promise<void>;
+    ignoreNextChanges(timeout: number): Promise<void>;
     rx<P>(Component: React.ComponentType<P>): React.ComponentClass<P>;
 }
 /**
@@ -57,5 +57,5 @@ export declare class Dependency {
  * thrown. Defaults to the error being logged to the console.
  * @returns {Tracker.Computation}
  */
-export declare function autorun(h5debug_name: string, f: (comp: Computation) => void, options?: IComputationOptions): Computation;
+export declare function autorun(h5debugname: string, f: (comp: Computation) => void, options?: IComputationOptions): Computation;
 export declare function flush(): void;

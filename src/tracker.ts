@@ -89,7 +89,7 @@ const Tracker = {
       }
     }
   },
-  autorun(h5debug_name, f: (comp: Computation) => void, options?: IComputationOptions) {
+  autorun(h5debugname, f: (comp: Computation) => void, options?: IComputationOptions) {
 
     if (typeof f !== "function") {
       throw new Error("Tracker.autorun requires a function argument");
@@ -98,7 +98,7 @@ const Tracker = {
     options = options || {};
 
     const c = new Computation(
-      h5debug_name, f, Tracker.currentComputation, options.onError);
+      h5debugname, f, Tracker.currentComputation, options.onError);
 
     if (Tracker.active) {
       Tracker.onInvalidate(() => {
@@ -163,12 +163,13 @@ export class Computation {
   private recomputing: boolean;
 
   constructor(
-    h5debug_name: string,
+    h5debugname: string,
     f: (comp: Computation) => void,
     parent: Computation,
     onError?: (error: Error) => void) {
     if (h5debug["@hoda5/tracker"]) {
-      (this as any).h5debug_name = h5debug_name;
+      if (typeof h5debugname !== "string") throw new Error("autorun precisa de um nome");
+      (this as any).h5debugname = h5debugname;
     }
     this.stopped = false;
     this.invalidated = false;
@@ -301,10 +302,11 @@ export class Dependency {
   public dependentsById: {
     [name: string]: Computation,
   };
-  constructor(h5debug_name) {
+  constructor(h5debugname) {
     this.dependentsById = Object.create(null);
     if (h5debug["@hoda5/tracker"]) {
-      (this as any).h5debug_name = h5debug_name;
+      if (typeof h5debugname !== "string") throw new Error("Dependency precisa de um nome");
+      (this as any).h5debugname = h5debugname;
     }
   }
 
@@ -319,7 +321,7 @@ export class Dependency {
     const id = computation.id;
     if (h5debug["@hoda5/tracker"]) {
       h5debug["@hoda5/tracker"](
-        (this as any).h5debug_name, ".depend() on ", (computation as any).h5debug_name,
+        (this as any).h5debugname, ".depend() on ", (computation as any).h5debugname,
       );
     }
 
@@ -339,7 +341,7 @@ export class Dependency {
       if (h5debug["@hoda5/tracker"]) {
         const computation = this.dependentsById[id];
         h5debug["@hoda5/tracker"](
-          (this as any).h5debug_name, ".changed() invalidating ", (computation as any).h5debug_name,
+          (this as any).h5debugname, ".changed() invalidating ", (computation as any).h5debugname,
         );
       }
       this.dependentsById[id].invalidate();
@@ -354,9 +356,9 @@ export class Dependency {
     return false;
   }
 
-  public async waitForNextChange(timeout?: number);
-  public async waitForNextChange(condition: () => boolean, timeout?: number);
-  public async waitForNextChange(a?: any, b?: any) {
+  public waitForNextChange(timeout?: number): Promise<void>;
+  public waitForNextChange(condition: () => boolean, timeout?: number): Promise<void>;
+  public waitForNextChange(a?: any, b?: any): Promise<void> {
     const condition: () => boolean = typeof a === "function" ? a : undefined;
     const timeout: number = condition ? b : a;
     const err = new Error("timeout");
@@ -365,7 +367,7 @@ export class Dependency {
         reject(err);
         comp.stop();
       }, timeout);
-      const comp = autorun((this as any).h5debug_name + ".waitForNextChange", (icomp) => {
+      const comp = autorun((this as any).h5debugname + ".waitForNextChange", (icomp) => {
         this.depend();
         if (!icomp.firstRun) {
           if (tm) {
@@ -379,13 +381,13 @@ export class Dependency {
     });
   }
 
-  public async ignoreNextChanges(timeout: number) {
+  public ignoreNextChanges(timeout: number): Promise<void> {
     return new Promise((resolve, reject) => {
       const tm = timeout && setTimeout(() => {
         comp.stop();
         resolve();
       }, timeout);
-      const comp = autorun((this as any).h5debug_name + ".ignoreNextChanges", (icomp) => {
+      const comp = autorun((this as any).h5debugname + ".ignoreNextChanges", (icomp) => {
         this.depend();
       });
     });
@@ -397,7 +399,7 @@ export class Dependency {
     return class extends React.Component<P, {}, {}> {
       public comp?: any;
       public componentWillMount() {
-        this.comp = autorun((dep as any).h5debug_name + ".rx", () => {
+        this.comp = autorun((dep as any).h5debugname + ".rx", () => {
           dep.depend();
           this.setState({});
         });
@@ -433,8 +435,8 @@ export class Dependency {
  * @returns {Tracker.Computation}
  */
 
-export function autorun(h5debug_name: string, f: (comp: Computation) => void, options?: IComputationOptions) {
-  return Tracker.autorun(h5debug_name, f, options);
+export function autorun(h5debugname: string, f: (comp: Computation) => void, options?: IComputationOptions) {
+  return Tracker.autorun(h5debugname, f, options);
 }
 
 export function flush() {
