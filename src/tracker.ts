@@ -167,9 +167,9 @@ export class Computation {
     f: (comp: Computation) => void,
     parent: Computation,
     onError?: (error: Error) => void) {
+    (this as any).h5debugname = h5debugname;
     if (h5debug["@hoda5/tracker"]) {
       if (typeof h5debugname !== "string") throw new Error("autorun precisa de um nome");
-      (this as any).h5debugname = h5debugname;
     }
     this.stopped = false;
     this.invalidated = false;
@@ -304,9 +304,9 @@ export class Dependency {
   };
   constructor(h5debugname) {
     this.dependentsById = Object.create(null);
+    (this as any).h5debugname = h5debugname;
     if (h5debug["@hoda5/tracker"]) {
       if (typeof h5debugname !== "string") throw new Error("Dependency precisa de um nome");
-      (this as any).h5debugname = h5debugname;
     }
   }
 

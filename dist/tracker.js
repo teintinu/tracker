@@ -140,10 +140,10 @@ function requireFlush() {
 }
 var Computation = /** @class */ (function () {
     function Computation(h5debugname, f, parent, onError) {
+        this.h5debugname = h5debugname;
         if (h5debug_1.h5debug["@hoda5/tracker"]) {
             if (typeof h5debugname !== "string")
                 throw new Error("autorun precisa de um nome");
-            this.h5debugname = h5debugname;
         }
         this.stopped = false;
         this.invalidated = false;
@@ -276,10 +276,10 @@ exports.Computation = Computation;
 var Dependency = /** @class */ (function () {
     function Dependency(h5debugname) {
         this.dependentsById = Object.create(null);
+        this.h5debugname = h5debugname;
         if (h5debug_1.h5debug["@hoda5/tracker"]) {
             if (typeof h5debugname !== "string")
                 throw new Error("Dependency precisa de um nome");
-            this.h5debugname = h5debugname;
         }
     }
     Dependency.prototype.depend = function (computation) {
