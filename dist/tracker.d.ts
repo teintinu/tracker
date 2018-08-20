@@ -60,3 +60,4 @@ export declare class Dependency {
 export declare function autorun(h5debugname: string, f: (comp: Computation) => void, options?: IComputationOptions): Computation;
 export declare function flush(): void;
 export declare function nonreactive<T>(f: () => T): T;
+export declare function afterFlush(f: () => void): void;

@@ -401,7 +401,7 @@ export class Dependency {
       public componentWillMount() {
         this.comp = autorun((dep as any).h5debugname + ".rx", () => {
           dep.depend();
-          this.setState({});
+          nonreactive(() => this.setState({}));
         });
       }
       public componentWillUnmount() {

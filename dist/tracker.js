@@ -368,7 +368,7 @@ var Dependency = /** @class */ (function () {
                 var _this = this;
                 this.comp = autorun(dep.h5debugname + ".rx", function () {
                     dep.depend();
-                    _this.setState({});
+                    nonreactive(function () { return _this.setState({}); });
                 });
             };
             class_1.prototype.componentWillUnmount = function () {
@@ -414,6 +414,10 @@ function nonreactive(f) {
     return Tracker.nonreactive(f);
 }
 exports.nonreactive = nonreactive;
+function afterFlush(f) {
+    return Tracker.afterFlush(f);
+}
+exports.afterFlush = afterFlush;
 // tslint:disable-next-line:max-classes-per-file
 var ErrorBoundary = /** @class */ (function (_super) {
     __extends(ErrorBoundary, _super);
@@ -427,7 +431,7 @@ var ErrorBoundary = /** @class */ (function (_super) {
             hasError: JSON.stringify({
                 info: info,
                 error: error.stack ? error.stack.toString() : error.message,
-            }, null, 2),
+            }, null, 2).replace(/\\n/g, "\n"),
         });
     };
     ErrorBoundary.prototype.render = function () {
