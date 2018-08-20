@@ -447,6 +447,10 @@ export function nonreactive<T>(f: () => T): T {
   return Tracker.nonreactive(f);
 }
 
+export function afterFlush(f: () => void): void {
+  return Tracker.afterFlush(f);
+}
+
 // tslint:disable-next-line:max-classes-per-file
 class ErrorBoundary extends React.Component<{}, { hasError: false | string }> {
   constructor(props) {
@@ -459,7 +463,7 @@ class ErrorBoundary extends React.Component<{}, { hasError: false | string }> {
       hasError: JSON.stringify({
         info,
         error: error.stack ? error.stack.toString() : error.message,
-      }, null, 2),
+      }, null, 2).replace(/\\n/g, "\n"),
     });
   }
 
