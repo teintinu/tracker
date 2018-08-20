@@ -410,6 +410,10 @@ function flush() {
     Tracker.flush();
 }
 exports.flush = flush;
+function nonreactive(f) {
+    return Tracker.nonreactive(f);
+}
+exports.nonreactive = nonreactive;
 // tslint:disable-next-line:max-classes-per-file
 var ErrorBoundary = /** @class */ (function (_super) {
     __extends(ErrorBoundary, _super);

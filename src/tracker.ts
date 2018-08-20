@@ -108,7 +108,7 @@ const Tracker = {
 
     return c;
   },
-  nonreactive(f: () => void) {
+  nonreactive<T>(f: () => T): T {
     const previous = Tracker.currentComputation;
     setCurrentComputation(null as any);
     try {
@@ -441,6 +441,10 @@ export function autorun(h5debugname: string, f: (comp: Computation) => void, opt
 
 export function flush() {
   Tracker.flush();
+}
+
+export function nonreactive<T>(f: () => T): T {
+  return Tracker.nonreactive(f);
 }
 
 // tslint:disable-next-line:max-classes-per-file
