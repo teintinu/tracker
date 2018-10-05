@@ -26,7 +26,10 @@ function setWeather(newWeather) {
   weather = newWeather;
   weatherDep.changed();
 }
+```
 
+```typescript
+// tracking with console.log
 autorun( ()=> {
   const weather = getWeather();
   console.log("Weather: " + weather);
@@ -34,4 +37,18 @@ autorun( ()=> {
 
 setTimeout( () => setWeather("rainy"), 1000);
 setTimeout( () => setWeather("cloudy"), 2000);
+``` 
+
+```typescript
+// tracking with ReactJS
+
+const ReactiveComponent = weatherDep.rx( () => {
+  const weather = getWeather();
+  return <span>Weather: <b>{weather}</b></span>;
+});
+
+react.render(element, <ReactiveComponent />)
+setTimeout( () => setWeather("rainy"), 1000);
+setTimeout( () => setWeather("cloudy"), 2000);
+
 ``` 
