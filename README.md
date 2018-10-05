@@ -46,12 +46,18 @@ setTimeout( () => setWeather("cloudy"), 2000);
 
 ```typescript
 
-const ReactiveComponent = weatherDep.rx( () => {
+const ReactiveComponent = weatherDep.rx(() => {
   const weather = getWeather();
-  return <span>Weather: <b>{weather}</b></span>;
+  return (
+    <span>
+      Weather: <b>{weather}</b>
+    </span>
+  );
 });
 
-react.render(<ReactiveComponent />, element)
+const rootElement = document.getElementById("root");
+ReactDOM.render(<ReactiveComponent />, rootElement);
+
 setTimeout( () => setWeather("rainy"), 1000);
 setTimeout( () => setWeather("cloudy"), 2000);
 
