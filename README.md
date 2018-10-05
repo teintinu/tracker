@@ -7,3 +7,31 @@ This package is an adaptation from
 - http://docs.meteor.com/#tracker
 - https://github.com/meteor/meteor/blob/master/packages/tracker/tracker.js
 
+```bash
+npm install @hoda5/tracker
+```
+
+```typescript
+import { autorun, Dependency } from '@hoda5/tracker'
+
+let weather = 'sunny';
+const weatherDep = new Dependency;
+
+function getWeather() {
+  weatherDep.depend();
+  return weather;
+}
+
+function setWeather(newWeather) {
+  weather = newWeather;
+  weatherDep.changed();
+}
+
+autorun( ()=> {
+  const weather = getWeather();
+  console.log("Weather: " + weather);
+});
+
+setTimeout( () => setWeather("rainy"), 1000);
+setTimeout( () => setWeather("cloudy"), 2000);
+``` 
