@@ -28,8 +28,9 @@ function setWeather(newWeather) {
 }
 ```
 
+### tracking with console.log
+
 ```typescript
-// tracking with console.log
 autorun( ()=> {
   const weather = getWeather();
   console.log("Weather: " + weather);
