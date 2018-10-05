@@ -39,15 +39,18 @@ setTimeout( () => setWeather("rainy"), 1000);
 setTimeout( () => setWeather("cloudy"), 2000);
 ``` 
 
+### tracking with ReactJS
+
+[![Edit mynz7nlmwj](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/mynz7nlmwj)
+
 ```typescript
-// tracking with ReactJS
 
 const ReactiveComponent = weatherDep.rx( () => {
   const weather = getWeather();
   return <span>Weather: <b>{weather}</b></span>;
 });
 
-react.render(element, <ReactiveComponent />)
+react.render(<ReactiveComponent />, element)
 setTimeout( () => setWeather("rainy"), 1000);
 setTimeout( () => setWeather("cloudy"), 2000);
 
