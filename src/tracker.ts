@@ -3,6 +3,7 @@
 /////////////////////////////////////////////////
 
 import * as React from "react";
+import "@hoda5/extensions";
 import { h5debug } from "@hoda5/h5debug";
 
 export interface IRunOptions {
@@ -89,7 +90,7 @@ const Tracker = {
       }
     }
   },
-  autorun(h5debugname, f: (comp: Computation) => void, options?: IComputationOptions) {
+  autorun(h5debugname: string, f: (comp: Computation) => void, options?: IComputationOptions) {
 
     if (typeof f !== "function") {
       throw new Error("Tracker.autorun requires a function argument");
@@ -298,13 +299,15 @@ export class Computation {
 }
 
 // tslint:disable-next-line
-export class Dependency {
+export class Dependency<T extends object={}> {
   public dependentsById: {
     [name: string]: Computation,
   };
-  constructor(h5debugname) {
+  constructor(h5debugname: string, initialvalue?: T) {
     this.dependentsById = Object.create(null);
     (this as any).h5debugname = h5debugname;
+    debugger
+    if (initialvalue) (this as any)._value = initialvalue;
     if (h5debug["@hoda5/tracker"]) {
       if (typeof h5debugname !== "string") throw new Error("Dependency precisa de um nome");
     }
@@ -333,6 +336,18 @@ export class Dependency {
       return true;
     }
     return false;
+  }
+
+  get value(): T {
+    this.depend();
+    return (this as any)._value;
+  }
+
+  set value(value: T) {
+    // if (Object.prototype.compareObj.call((this as any)._value, value) !== 0) {
+    (this as any)._value = value;
+    this.changed();
+    // }
   }
 
   public changed() {
@@ -393,10 +408,10 @@ export class Dependency {
     });
   }
 
-  public rx<P>(Component: React.ComponentType<P>): React.ComponentClass<P> {
+  public rx(Component: React.ComponentType<T>): React.ComponentClass<{}, {}> {
     const dep = this;
     // tslint:disable-next-line:max-classes-per-file
-    return class extends React.Component<P, {}, {}> {
+    return class extends React.Component<{}, {}, {}> {
       public comp?: any;
       public componentWillMount() {
         this.comp = autorun((dep as any).h5debugname + ".rx", () => {
@@ -411,7 +426,7 @@ export class Dependency {
       }
       public render() {
         return React.createElement(ErrorBoundary, null,
-          React.createElement(Component, this.props));
+          React.createElement(Component, (dep as any)._value));
       }
     };
   }

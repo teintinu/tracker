@@ -1,4 +1,5 @@
 import * as React from "react";
+import "@hoda5/extensions";
 export interface IRunOptions {
     finishSynchronously?: boolean;
 }
@@ -27,18 +28,19 @@ export declare class Computation {
     flush(): void;
     run(): void;
 }
-export declare class Dependency {
+export declare class Dependency<T extends object = {}> {
     dependentsById: {
         [name: string]: Computation;
     };
-    constructor(h5debugname: any);
+    constructor(h5debugname: string, initialvalue?: T);
     depend(computation?: Computation): boolean;
+    value: T;
     changed(): void;
     hasDependents(): boolean;
     waitForNextChange(timeout?: number): Promise<void>;
     waitForNextChange(condition: () => boolean, timeout?: number): Promise<void>;
     ignoreNextChanges(timeout: number): Promise<void>;
-    rx<P>(Component: React.ComponentType<P>): React.ComponentClass<P>;
+    rx(Component: React.ComponentType<T>): React.ComponentClass<{}, {}>;
 }
 /**
  * @callback Tracker.ComputationFunction

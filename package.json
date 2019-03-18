@@ -1,6 +1,6 @@
 {
   "name": "@hoda5/tracker",
-  "version": "1.0.21",
+  "version": "1.0.22",
   "description": "",
   "main": "dist/tracker.js",
   "types": "dist/tracker.d.ts",
@@ -20,18 +20,19 @@
   },
   "license": "ISC",
   "dependencies": {
-    "@hoda5/h5debug": "^1.0.3",
-    "react": "^16.4.1"
+    "@hoda5/extensions": "^1.1.16",
+    "@hoda5/h5debug": "^1.0.9",
+    "react": "^16.8.4"
   },
   "devDependencies": {
-    "@types/jest": "^23.1.2",
-    "@types/react": "^16.4.0",
-    "@types/react-test-renderer": "^16.0.1",
-    "jest": "^23.2.0",
-    "react-test-renderer": "^16.4.1",
-    "ts-jest": "^23.10.3",
-    "tslint": "^5.9.1",
-    "typescript": "^3.1.1"
+    "@types/jest": "^24.0.11",
+    "@types/react": "^16.8.8",
+    "@types/react-test-renderer": "^16.8.1",
+    "jest": "^24.5.0",
+    "react-test-renderer": "^16.8.4",
+    "ts-jest": "^24.0.0",
+    "tslint": "^5.14.0",
+    "typescript": "^3.3.3333"
   },
   "jest": {
     "verbose": true,
@@ -50,7 +51,7 @@
       "json",
       "node"
     ],
-    "collectCoverage": true,
+    "collectCoverage": false,
     "coverageReporters": [
       "json",
       "lcov",

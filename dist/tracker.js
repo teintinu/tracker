@@ -3,9 +3,12 @@
 // adapted from http://docs.meteor.com/#tracker //
 /////////////////////////////////////////////////
 var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -14,6 +17,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = require("react");
+require("@hoda5/extensions");
 var h5debug_1 = require("@hoda5/h5debug");
 // tslint:disable-next-line:variable-name
 var Tracker = {
@@ -274,9 +278,11 @@ var Computation = /** @class */ (function () {
 exports.Computation = Computation;
 // tslint:disable-next-line
 var Dependency = /** @class */ (function () {
-    function Dependency(h5debugname) {
+    function Dependency(h5debugname, initialvalue) {
         this.dependentsById = Object.create(null);
         this.h5debugname = h5debugname;
+        if (initialvalue)
+            this._value = initialvalue;
         if (h5debug_1.h5debug["@hoda5/tracker"]) {
             if (typeof h5debugname !== "string")
                 throw new Error("Dependency precisa de um nome");
@@ -303,6 +309,20 @@ var Dependency = /** @class */ (function () {
         }
         return false;
     };
+    Object.defineProperty(Dependency.prototype, "value", {
+        get: function () {
+            this.depend();
+            return this._value;
+        },
+        set: function (value) {
+            if (Object.prototype.compareObj.call(this._value, value) !== 0) {
+                this._value = value;
+                this.changed();
+            }
+        },
+        enumerable: true,
+        configurable: true
+    });
     Dependency.prototype.changed = function () {
         // tslint:disable-next-line
         for (var id in this.dependentsById) {
@@ -377,7 +397,8 @@ var Dependency = /** @class */ (function () {
                 }
             };
             class_1.prototype.render = function () {
-                return React.createElement(ErrorBoundary, null, React.createElement(Component, this.props));
+                debugger;
+                return React.createElement(ErrorBoundary, null, React.createElement(Component, this._value));
             };
             return class_1;
         }(React.Component));
