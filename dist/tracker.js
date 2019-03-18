@@ -281,6 +281,7 @@ var Dependency = /** @class */ (function () {
     function Dependency(h5debugname, initialvalue) {
         this.dependentsById = Object.create(null);
         this.h5debugname = h5debugname;
+        debugger;
         if (initialvalue)
             this._value = initialvalue;
         if (h5debug_1.h5debug["@hoda5/tracker"]) {
@@ -315,10 +316,10 @@ var Dependency = /** @class */ (function () {
             return this._value;
         },
         set: function (value) {
-            if (Object.prototype.compareObj.call(this._value, value) !== 0) {
-                this._value = value;
-                this.changed();
-            }
+            // if (Object.prototype.compareObj.call((this as any)._value, value) !== 0) {
+            this._value = value;
+            this.changed();
+            // }
         },
         enumerable: true,
         configurable: true
@@ -397,8 +398,7 @@ var Dependency = /** @class */ (function () {
                 }
             };
             class_1.prototype.render = function () {
-                debugger;
-                return React.createElement(ErrorBoundary, null, React.createElement(Component, this._value));
+                return React.createElement(ErrorBoundary, null, React.createElement(Component, dep._value));
             };
             return class_1;
         }(React.Component));
