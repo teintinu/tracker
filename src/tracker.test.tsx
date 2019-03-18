@@ -1,9 +1,8 @@
 
 import * as React from "react";
 import * as TestRenderer from "react-test-renderer";
-import { autorun, Dependency, flush } from "./tracker";
+import { autorun, Dependency, flush, reactProvider } from "./tracker";
 import { enableDebug, disableDebug, h5debug } from "@hoda5/h5debug";
-import { number } from "prop-types";
 
 describe("tracker", () => {
     beforeEach(() => enableDebug("@hoda5/tracker", { disableConsole: true }));
@@ -277,12 +276,12 @@ describe("tracker", () => {
 
             let renderCount = 0;
             const dep = new Dependency("dep");
-            const Comp = dep.rx(() => {
+            const p = reactProvider("dep.rx", () => {
                 renderCount++;
                 return <div className="e">{renderCount}</div>;
-            });
+            }, [dep]);
             expect(renderCount).toBe(0);
-            const r = TestRenderer.create(<Comp />);
+            const r = TestRenderer.create(<p.render />);
             expect(renderCount).toBe(1);
             expect(r.root.findByProps({ className: "e" }).children).toEqual(["1"]);
 
@@ -308,17 +307,17 @@ describe("tracker", () => {
             ]);
 
         });
-        it("dep.rx - nested", async () => {
+        it("dep.rx - multi", async () => {
 
             let renderCount = 0;
             const dep1 = new Dependency("dep1");
             const dep2 = new Dependency("dep2");
-            const Comp = dep1.rx(dep2.rx(() => {
+            const p = reactProvider("dep.rx", () => {
                 renderCount++;
                 return <div className="e">{renderCount}</div>;
-            }));
+            }, [dep1, dep2]);
             expect(renderCount).toBe(0);
-            const r = TestRenderer.create(<Comp />);
+            const r = TestRenderer.create(<p.render />);
             expect(renderCount).toBe(1);
             expect(r.root.findByProps({ className: "e" }).children).toEqual(["1"]);
 
@@ -331,17 +330,19 @@ describe("tracker", () => {
             expect(r.root.findByProps({ className: "e" }).children).toEqual(["3"]);
 
             expect(h5debug["@hoda5/tracker"].history()).toEqual([
-                "dep1.depend() on dep1.rx",
-                "dep2.depend() on dep2.rx",
+                "dep1.depend() on dep.rx",
+                "dep2.depend() on dep.rx",
                 "dep1.depend() on dep1.waitForNextChange",
-                "dep1.changed() invalidating dep1.rx",
+                "dep1.changed() invalidating dep.rx",
                 "dep1.changed() invalidating dep1.waitForNextChange",
-                "dep1.depend() on dep1.rx",
+                "dep1.depend() on dep.rx",
+                "dep2.depend() on dep.rx",
                 "dep1.depend() on dep1.waitForNextChange",
                 "dep2.depend() on dep2.waitForNextChange",
-                "dep2.changed() invalidating dep2.rx",
+                "dep2.changed() invalidating dep.rx",
                 "dep2.changed() invalidating dep2.waitForNextChange",
-                "dep2.depend() on dep2.rx",
+                "dep1.depend() on dep.rx",
+                "dep2.depend() on dep.rx",
                 "dep2.depend() on dep2.waitForNextChange",
             ]);
 
@@ -350,16 +351,17 @@ describe("tracker", () => {
 
             let renderCount = 0;
             const dep = new Dependency("dep");
-            const Comp = dep.rx(
+            const p = reactProvider("dep.rx",
                 class extends React.Component<{}> {
                     public render() {
                         renderCount++;
                         return <div className="e">{renderCount}</div>;
                     }
                 },
+                [dep],
             );
             expect(renderCount).toBe(0);
-            const r = TestRenderer.create(<Comp />);
+            const r = TestRenderer.create(<p.render />);
             expect(renderCount).toBe(1);
             expect(r.root.findByProps({ className: "e" }).children).toEqual(["1"]);
 
@@ -393,12 +395,12 @@ describe("tracker", () => {
 
             let renderCount = 0;
             const dep = new Dependency("dep");
-            const Comp = dep.rx((p: {}) => {
+            const p = reactProvider("dep.rx", () => {
                 renderCount++;
                 throw new Error(["@erro", renderCount, "@"].join(""));
-            });
+            }, [dep]);
             expect(renderCount).toBe(0);
-            const r = TestRenderer.create(<Comp />);
+            const r = TestRenderer.create(<p.render />);
 
             // expect(renderCount).toBe(1);
             // const res1 = r.toJSON();
@@ -430,12 +432,12 @@ describe("tracker", () => {
             let renderCount = 0;
             const dep = new Dependency<{ p1: number, p2: string }>("dep-var", { p1: 500, p2: "a" });
 
-            const Comp = dep.rx((vr) => {
+            const p = reactProvider("dep-var.rx", () => {
                 renderCount++;
-                return <div className="e">{renderCount}/{vr.p1}/{vr.p2}</div>;
-            });
+                return <div className="e">{renderCount}/{dep.value.p1}/{dep.value.p2}</div>;
+            }, [dep]);
             expect(renderCount).toBe(0);
-            const r = TestRenderer.create(<Comp />);
+            const r = TestRenderer.create(<p.render />);
             expect(renderCount).toBe(1);
             expect(r.root.findByProps({ className: "e" }).children).toEqual(["1", "/", "500", "/", "a"]);
 

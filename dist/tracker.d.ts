@@ -40,8 +40,15 @@ export declare class Dependency<T extends object = {}> {
     waitForNextChange(timeout?: number): Promise<void>;
     waitForNextChange(condition: () => boolean, timeout?: number): Promise<void>;
     ignoreNextChanges(timeout: number): Promise<void>;
-    rx(Component: React.ComponentType<T>): React.ComponentClass<{}, {}>;
 }
+export declare function reactProvider(h5debugname: string, Component: React.ComponentType<{}>, dependencies: Array<Dependency<any>>): {
+    dependencies: {
+        readonly list: Dependency<any>[];
+        add(dependency: Dependency<{}>): void;
+        remove(dependency: Dependency<{}>): void;
+    };
+    render: React.ComponentType<{}>;
+};
 /**
  * @callback Tracker.ComputationFunction
  * @param {Tracker.Computation}

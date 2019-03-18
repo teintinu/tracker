@@ -306,7 +306,6 @@ export class Dependency<T extends object={}> {
   constructor(h5debugname: string, initialvalue?: T) {
     this.dependentsById = Object.create(null);
     (this as any).h5debugname = h5debugname;
-    debugger
     if (initialvalue) (this as any)._value = initialvalue;
     if (h5debug["@hoda5/tracker"]) {
       if (typeof h5debugname !== "string") throw new Error("Dependency precisa de um nome");
@@ -407,29 +406,47 @@ export class Dependency<T extends object={}> {
       });
     });
   }
+}
 
-  public rx(Component: React.ComponentType<T>): React.ComponentClass<{}, {}> {
-    const dep = this;
-    // tslint:disable-next-line:max-classes-per-file
-    return class extends React.Component<{}, {}, {}> {
-      public comp?: any;
-      public componentWillMount() {
-        this.comp = autorun((dep as any).h5debugname + ".rx", () => {
-          dep.depend();
-          nonreactive(() => this.setState({}));
-        });
-      }
-      public componentWillUnmount() {
-        if (this.comp) {
-          this.comp.stop();
-        }
-      }
-      public render() {
-        return React.createElement(ErrorBoundary, null,
-          React.createElement(Component, (dep as any)._value));
-      }
-    };
+export function reactProvider(
+  h5debugname: string,
+  Component: React.ComponentType<{}>,
+  dependencies: Array<Dependency<any>>) {
+
+  // tslint:disable-next-line:max-classes-per-file
+  class ReactProviderComp extends React.Component<{}, {}, {}> {
+    private comp: Computation;
+    public componentWillMount() {
+      this.comp = autorun(h5debugname, (c) => {
+        dependencies.forEach((dep) => dep.depend());
+        if (!c.firstRun) nonreactive(() => this.setState({}));
+      });
+    }
+    public componentWillUnmount() {
+      if (this.comp) this.comp.stop();
+    }
+    public render() {
+      return React.createElement(ErrorBoundary, null,
+        React.createElement(Component));
+    }
   }
+
+  return {
+    dependencies: {
+      get list() {
+        return dependencies;
+      },
+      add(dependency: Dependency) {
+        const i = dependencies.indexOf(dependency);
+        if (i === -1) dependencies.push(dependency);
+      },
+      remove(dependency: Dependency) {
+        const i = dependencies.indexOf(dependency);
+        if (i !== -1) dependencies.splice(i, 1);
+      },
+    },
+    render: ReactProviderComp as React.ComponentType<{}>,
+  };
 }
 
 /**

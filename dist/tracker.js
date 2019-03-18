@@ -281,7 +281,6 @@ var Dependency = /** @class */ (function () {
     function Dependency(h5debugname, initialvalue) {
         this.dependentsById = Object.create(null);
         this.h5debugname = h5debugname;
-        debugger;
         if (initialvalue)
             this._value = initialvalue;
         if (h5debug_1.h5debug["@hoda5/tracker"]) {
@@ -377,35 +376,53 @@ var Dependency = /** @class */ (function () {
             });
         });
     };
-    Dependency.prototype.rx = function (Component) {
-        var dep = this;
-        // tslint:disable-next-line:max-classes-per-file
-        return /** @class */ (function (_super) {
-            __extends(class_1, _super);
-            function class_1() {
-                return _super !== null && _super.apply(this, arguments) || this;
-            }
-            class_1.prototype.componentWillMount = function () {
-                var _this = this;
-                this.comp = autorun(dep.h5debugname + ".rx", function () {
-                    dep.depend();
-                    nonreactive(function () { return _this.setState({}); });
-                });
-            };
-            class_1.prototype.componentWillUnmount = function () {
-                if (this.comp) {
-                    this.comp.stop();
-                }
-            };
-            class_1.prototype.render = function () {
-                return React.createElement(ErrorBoundary, null, React.createElement(Component, dep._value));
-            };
-            return class_1;
-        }(React.Component));
-    };
     return Dependency;
 }());
 exports.Dependency = Dependency;
+function reactProvider(h5debugname, Component, dependencies) {
+    // tslint:disable-next-line:max-classes-per-file
+    var ReactProviderComp = /** @class */ (function (_super) {
+        __extends(ReactProviderComp, _super);
+        function ReactProviderComp() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        ReactProviderComp.prototype.componentWillMount = function () {
+            var _this = this;
+            this.comp = autorun(h5debugname, function (c) {
+                dependencies.forEach(function (dep) { return dep.depend(); });
+                if (!c.firstRun)
+                    nonreactive(function () { return _this.setState({}); });
+            });
+        };
+        ReactProviderComp.prototype.componentWillUnmount = function () {
+            if (this.comp)
+                this.comp.stop();
+        };
+        ReactProviderComp.prototype.render = function () {
+            return React.createElement(ErrorBoundary, null, React.createElement(Component));
+        };
+        return ReactProviderComp;
+    }(React.Component));
+    return {
+        dependencies: {
+            get list() {
+                return dependencies;
+            },
+            add: function (dependency) {
+                var i = dependencies.indexOf(dependency);
+                if (i === -1)
+                    dependencies.push(dependency);
+            },
+            remove: function (dependency) {
+                var i = dependencies.indexOf(dependency);
+                if (i !== -1)
+                    dependencies.splice(i, 1);
+            },
+        },
+        render: ReactProviderComp,
+    };
+}
+exports.reactProvider = reactProvider;
 /**
  * @callback Tracker.ComputationFunction
  * @param {Tracker.Computation}
