@@ -380,6 +380,7 @@ var Dependency = /** @class */ (function () {
 }());
 exports.Dependency = Dependency;
 function reactProvider(h5debugname, Component, dependencies) {
+    var depProv = new Dependency(h5debugname);
     // tslint:disable-next-line:max-classes-per-file
     var ReactProviderComp = /** @class */ (function (_super) {
         __extends(ReactProviderComp, _super);
@@ -388,7 +389,8 @@ function reactProvider(h5debugname, Component, dependencies) {
         }
         ReactProviderComp.prototype.componentWillMount = function () {
             var _this = this;
-            this.comp = autorun(h5debugname, function (c) {
+            this.comp = autorun(h5debugname + ".rx", function (c) {
+                depProv.depend();
                 dependencies.forEach(function (dep) { return dep.depend(); });
                 if (!c.firstRun)
                     nonreactive(function () { return _this.setState({}); });
@@ -406,17 +408,22 @@ function reactProvider(h5debugname, Component, dependencies) {
     return {
         dependencies: {
             get list() {
+                depProv.depend();
                 return dependencies;
             },
             add: function (dependency) {
                 var i = dependencies.indexOf(dependency);
-                if (i === -1)
+                if (i === -1) {
                     dependencies.push(dependency);
+                    depProv.changed();
+                }
             },
             remove: function (dependency) {
                 var i = dependencies.indexOf(dependency);
-                if (i !== -1)
+                if (i !== -1) {
                     dependencies.splice(i, 1);
+                    depProv.changed();
+                }
             },
         },
         render: ReactProviderComp,

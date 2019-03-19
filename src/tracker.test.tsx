@@ -276,7 +276,7 @@ describe("tracker", () => {
 
             let renderCount = 0;
             const dep = new Dependency("dep");
-            const p = reactProvider("dep.rx", () => {
+            const p = reactProvider("p", () => {
                 renderCount++;
                 return <div className="e">{renderCount}</div>;
             }, [dep]);
@@ -294,15 +294,19 @@ describe("tracker", () => {
             expect(r.root.findByProps({ className: "e" }).children).toEqual(["3"]);
 
             expect(h5debug["@hoda5/tracker"].history()).toEqual([
-                "dep.depend() on dep.rx",
+                "p.depend() on p.rx",
+                "dep.depend() on p.rx",
                 "dep.depend() on dep.waitForNextChange",
-                "dep.changed() invalidating dep.rx",
+                "dep.changed() invalidating p.rx",
                 "dep.changed() invalidating dep.waitForNextChange",
-                "dep.depend() on dep.rx", "dep.depend() on dep.waitForNextChange",
+                "p.depend() on p.rx",
+                "dep.depend() on p.rx",
                 "dep.depend() on dep.waitForNextChange",
-                "dep.changed() invalidating dep.rx",
+                "dep.depend() on dep.waitForNextChange",
+                "dep.changed() invalidating p.rx",
                 "dep.changed() invalidating dep.waitForNextChange",
-                "dep.depend() on dep.rx",
+                "p.depend() on p.rx",
+                "dep.depend() on p.rx",
                 "dep.depend() on dep.waitForNextChange",
             ]);
 
@@ -312,7 +316,7 @@ describe("tracker", () => {
             let renderCount = 0;
             const dep1 = new Dependency("dep1");
             const dep2 = new Dependency("dep2");
-            const p = reactProvider("dep.rx", () => {
+            const p = reactProvider("p", () => {
                 renderCount++;
                 return <div className="e">{renderCount}</div>;
             }, [dep1, dep2]);
@@ -330,19 +334,22 @@ describe("tracker", () => {
             expect(r.root.findByProps({ className: "e" }).children).toEqual(["3"]);
 
             expect(h5debug["@hoda5/tracker"].history()).toEqual([
-                "dep1.depend() on dep.rx",
-                "dep2.depend() on dep.rx",
+                "p.depend() on p.rx",
+                "dep1.depend() on p.rx",
+                "dep2.depend() on p.rx",
                 "dep1.depend() on dep1.waitForNextChange",
-                "dep1.changed() invalidating dep.rx",
+                "dep1.changed() invalidating p.rx",
                 "dep1.changed() invalidating dep1.waitForNextChange",
-                "dep1.depend() on dep.rx",
-                "dep2.depend() on dep.rx",
+                "p.depend() on p.rx",
+                "dep1.depend() on p.rx",
+                "dep2.depend() on p.rx",
                 "dep1.depend() on dep1.waitForNextChange",
                 "dep2.depend() on dep2.waitForNextChange",
-                "dep2.changed() invalidating dep.rx",
+                "dep2.changed() invalidating p.rx",
                 "dep2.changed() invalidating dep2.waitForNextChange",
-                "dep1.depend() on dep.rx",
-                "dep2.depend() on dep.rx",
+                "p.depend() on p.rx",
+                "dep1.depend() on p.rx",
+                "dep2.depend() on p.rx",
                 "dep2.depend() on dep2.waitForNextChange",
             ]);
 
@@ -351,7 +358,7 @@ describe("tracker", () => {
 
             let renderCount = 0;
             const dep = new Dependency("dep");
-            const p = reactProvider("dep.rx",
+            const p = reactProvider("p",
                 class extends React.Component<{}> {
                     public render() {
                         renderCount++;
@@ -376,16 +383,19 @@ describe("tracker", () => {
             expect(r.root.findByProps({ className: "e" }).children).toEqual(["3"]);
 
             expect(h5debug["@hoda5/tracker"].history()).toEqual([
-                "dep.depend() on dep.rx",
+                "p.depend() on p.rx",
+                "dep.depend() on p.rx",
                 "dep.depend() on dep.waitForNextChange",
-                "dep.changed() invalidating dep.rx",
+                "dep.changed() invalidating p.rx",
                 "dep.changed() invalidating dep.waitForNextChange",
-                "dep.depend() on dep.rx",
+                "p.depend() on p.rx",
+                "dep.depend() on p.rx",
                 "dep.depend() on dep.waitForNextChange",
                 "dep.depend() on dep.waitForNextChange",
-                "dep.changed() invalidating dep.rx",
+                "dep.changed() invalidating p.rx",
                 "dep.changed() invalidating dep.waitForNextChange",
-                "dep.depend() on dep.rx",
+                "p.depend() on p.rx",
+                "dep.depend() on p.rx",
                 "dep.depend() on dep.waitForNextChange",
             ]);
 
@@ -395,7 +405,7 @@ describe("tracker", () => {
 
             let renderCount = 0;
             const dep = new Dependency("dep");
-            const p = reactProvider("dep.rx", () => {
+            const p = reactProvider("p", () => {
                 renderCount++;
                 throw new Error(["@erro", renderCount, "@"].join(""));
             }, [dep]);
@@ -421,7 +431,8 @@ describe("tracker", () => {
             // expect(res1.children[0].split("@erro2@").length).toEqual(2);
 
             expect(h5debug["@hoda5/tracker"].history()).toEqual([
-                "dep.depend() on dep.rx",
+                "p.depend() on p.rx",
+                "dep.depend() on p.rx",
             ]);
         });
     });
@@ -432,7 +443,7 @@ describe("tracker", () => {
             let renderCount = 0;
             const dep = new Dependency<{ p1: number, p2: string }>("dep-var", { p1: 500, p2: "a" });
 
-            const p = reactProvider("dep-var.rx", () => {
+            const p = reactProvider("p-var", () => {
                 renderCount++;
                 return <div className="e">{renderCount}/{dep.value.p1}/{dep.value.p2}</div>;
             }, [dep]);
@@ -450,15 +461,19 @@ describe("tracker", () => {
             expect(r.root.findByProps({ className: "e" }).children).toEqual(["3", "/", "502", "/", "c"]);
 
             expect(h5debug["@hoda5/tracker"].history()).toEqual([
-                "dep-var.depend() on dep-var.rx",
+                "p-var.depend() on p-var.rx",
+                "dep-var.depend() on p-var.rx",
                 "dep-var.depend() on dep-var.waitForNextChange",
-                "dep-var.changed() invalidating dep-var.rx",
+                "dep-var.changed() invalidating p-var.rx",
                 "dep-var.changed() invalidating dep-var.waitForNextChange",
-                "dep-var.depend() on dep-var.rx", "dep-var.depend() on dep-var.waitForNextChange",
+                "p-var.depend() on p-var.rx",
+                "dep-var.depend() on p-var.rx",
                 "dep-var.depend() on dep-var.waitForNextChange",
-                "dep-var.changed() invalidating dep-var.rx",
+                "dep-var.depend() on dep-var.waitForNextChange",
+                "dep-var.changed() invalidating p-var.rx",
                 "dep-var.changed() invalidating dep-var.waitForNextChange",
-                "dep-var.depend() on dep-var.rx",
+                "p-var.depend() on p-var.rx",
+                "dep-var.depend() on p-var.rx",
                 "dep-var.depend() on dep-var.waitForNextChange",
             ]);
 

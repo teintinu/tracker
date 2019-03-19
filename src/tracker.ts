@@ -413,11 +413,14 @@ export function reactProvider(
   Component: React.ComponentType<{}>,
   dependencies: Array<Dependency<any>>) {
 
+  const depProv = new Dependency(h5debugname);
+
   // tslint:disable-next-line:max-classes-per-file
   class ReactProviderComp extends React.Component<{}, {}, {}> {
     private comp: Computation;
     public componentWillMount() {
-      this.comp = autorun(h5debugname, (c) => {
+      this.comp = autorun(h5debugname + ".rx", (c) => {
+        depProv.depend();
         dependencies.forEach((dep) => dep.depend());
         if (!c.firstRun) nonreactive(() => this.setState({}));
       });
@@ -434,15 +437,22 @@ export function reactProvider(
   return {
     dependencies: {
       get list() {
+        depProv.depend();
         return dependencies;
       },
       add(dependency: Dependency) {
         const i = dependencies.indexOf(dependency);
-        if (i === -1) dependencies.push(dependency);
+        if (i === -1) {
+          dependencies.push(dependency);
+          depProv.changed();
+        }
       },
       remove(dependency: Dependency) {
         const i = dependencies.indexOf(dependency);
-        if (i !== -1) dependencies.splice(i, 1);
+        if (i !== -1) {
+          dependencies.splice(i, 1);
+          depProv.changed();
+        }
       },
     },
     render: ReactProviderComp as React.ComponentType<{}>,
