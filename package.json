@@ -1,6 +1,6 @@
 {
   "name": "@hoda5/tracker",
-  "version": "1.0.25",
+  "version": "1.0.27",
   "description": "",
   "main": "dist/tracker.js",
   "types": "dist/tracker.d.ts",
@@ -20,19 +20,20 @@
   },
   "license": "ISC",
   "dependencies": {
-    "@hoda5/extensions": "^1.1.16",
-    "@hoda5/h5debug": "^1.0.9",
-    "react": "^16.8.4"
+    "tslib": "^1.11.1",
+    "@hoda5/extensions": "^1.3.14",
+    "@hoda5/h5debug": "^1.0.10",
+    "react": "^16.13.1"
   },
   "devDependencies": {
-    "@types/jest": "^24.0.11",
-    "@types/react": "^16.8.8",
-    "@types/react-test-renderer": "^16.8.1",
-    "jest": "^24.5.0",
-    "react-test-renderer": "^16.8.4",
-    "ts-jest": "^24.0.0",
-    "tslint": "^5.14.0",
-    "typescript": "^3.3.3333"
+    "@types/jest": "^25.1.4",
+    "@types/react": "^16.9.25",
+    "@types/react-test-renderer": "^16.9.2",
+    "jest": "^25.1.0",
+    "react-test-renderer": "^16.13.1",
+    "ts-jest": "^25.2.1",
+    "tslint": "^6.1.0",
+    "typescript": "^3.8.3"
   },
   "jest": {
     "verbose": true,

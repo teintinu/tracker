@@ -34,7 +34,8 @@ export declare class Dependency<T extends object = {}> {
     };
     constructor(h5debugname: string, initialvalue?: T);
     depend(computation?: Computation): boolean;
-    value: T;
+    get value(): T;
+    set value(value: T);
     changed(): void;
     hasDependents(): boolean;
     waitForNextChange(timeout?: number): Promise<void>;
